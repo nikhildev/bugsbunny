@@ -9,7 +9,3 @@ var runCmd = &cobra.Command{
 	Short: "Run a service",
 	Long:  `Run various BugsBunny services.`,
 }
-
-func init() {
-	runCmd.AddCommand(serverCmd)
-}
