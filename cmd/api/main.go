@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/nikhildev/bugsbunny/cmd"
+	"github.com/nikhildev/bugsbunny/cmd/api/commands"
 )
 
 func main() {
-	cmd.Execute()
+	commands.Execute()
 }
