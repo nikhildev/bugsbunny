@@ -14,8 +14,8 @@ type Component struct {
 	Status          ComponentStatus `json:"status" gorm:"not null"`
 	SlackChannelID  *string         `json:"slack_channel_id"`
 	IsBotEnabled    bool            `json:"is_bot_enabled"`
-	BotKnowledge    []string        `json:"bot_knowledge"`
-	BotInstructions []string        `json:"bot_instructions"`
+	BotKnowledge    []string        `json:"bot_knowledge" gorm:"type:jsonb"`
+	BotInstructions []string        `json:"bot_instructions" gorm:"type:jsonb"`
 }
 
 type ComponentStatus string

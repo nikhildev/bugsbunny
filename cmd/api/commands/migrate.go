@@ -109,12 +109,14 @@ func seedUsers(db *gorm.DB) error {
 func seedComponents(db *gorm.DB) error {
 	components := []models.Component{
 		{
-			Name:           "General",
-			Description:    "All general issues",
-			Owner:          "admin",
-			Status:         models.ACTIVE,
-			SlackChannelID: nil, // Fixed: do not use a non-existent channel, set to nil
-			IsBotEnabled:   false,
+			Name:            "General",
+			Description:     "All general issues",
+			Owner:           "admin",
+			Status:          models.ACTIVE,
+			SlackChannelID:  nil, // Fixed: do not use a non-existent channel, set to nil
+			IsBotEnabled:    false,
+			BotKnowledge:    []string{},
+			BotInstructions: []string{},
 		},
 	}
 
@@ -129,7 +131,7 @@ func seedComponents(db *gorm.DB) error {
 
 func loadDBConfig() dbConfig {
 	v := viper.New()
-	v.SetEnvPrefix("BUGSBUNNY")
+	v.SetEnvPrefix("DB")
 	v.SetConfigFile(".env")
 	v.SetConfigType("env")
 	err := v.ReadInConfig()
