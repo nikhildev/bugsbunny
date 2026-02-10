@@ -8,10 +8,7 @@ import (
 
 func SetupRoutes() *http.ServeMux {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(200)
-		w.Write([]byte("OK"))
-	})
-	mux.HandleFunc("POST /components", component.CreateComponentHandler)
+	RegisterHealthRoutes(mux)
+	component.RegisterComponentRoutes(mux)
 	return mux
 }
