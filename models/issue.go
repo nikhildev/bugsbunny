@@ -1,18 +1,14 @@
 package models
 
-import "time"
-
 type Issue struct {
-	ID            int         `json:"id"`
-	Title         string      `json:"title"`
-	Description   string      `json:"description"`
+	BaseModel
+	Title         string      `json:"title" gorm:"size:255;not null"`
+	Description   string      `json:"description" gorm:"type:text;not null"`
 	Type          IssueType   `json:"type"`
 	Status        IssueStatus `json:"status"`
-	CreatedAt     time.Time   `json:"created_at" time_format:"2006-01-02 15:04:05"`
-	UpdatedAt     time.Time   `json:"updated_at" time_format:"2006-01-02 15:04:05"`
-	Assignee      *string     `json:"assignee"`
-	Reporter      *string     `json:"reporter"`
-	Components    []string    `json:"components"`
+	Assignee      *string     `json:"assignee" gorm:"size:64;not null"`
+	Reporter      *string     `json:"reporter" gorm:"size:64;not null"`
+	Components    []string    `json:"components" gorm:"not null"`
 	Attachments   []string    `json:"attachments"`
 	Tags          []string    `json:"tags"`
 	Priority      *Priority   `json:"priority"`

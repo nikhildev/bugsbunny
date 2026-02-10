@@ -1,15 +1,21 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+)
 
 type User struct {
-	ID        int       `json:"id"`
-	Username  string    `json:"username"`
-	Email     string    `json:"email"`
-	Password  string    `json:"password"`
-	CreatedAt time.Time `json:"created_at" time_format:"2006-01-02 15:04:05"`
-	UpdatedAt time.Time `json:"updated_at" time_format:"2006-01-02 15:04:05"`
-	Role      UserRole  `json:"role"`
+	BaseModel
+	Username  string     `json:"username" gorm:"size:64;not null;unique"`
+	Email     string     `json:"email" gorm:"not null;unique"`
+	Password  string     `json:"password" gorm:"size:64;not null"`
+	Role      UserRole   `json:"role" gorm:"not null"`
+	IsActive  bool       `json:"is_active" gorm:"not null"`
+	IsDeleted bool       `json:"is_deleted" gorm:"not null"`
+	DeletedAt *time.Time `json:"deleted_at" time_format:"2006-01-02 15:04:05" gorm:"index"`
 }
 
 type UserRole string
@@ -19,3 +25,12 @@ const (
 	Viewer UserRole = "viewer"
 	Editor UserRole = "editor"
 )
+
+func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
+	uuid, err := uuid.NewV7()
+	if err != nil {
+		return err
+	}
+	u.ID = uuid.String()
+	return nil
+}
