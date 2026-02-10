@@ -10,12 +10,12 @@ type Component struct {
 	Name            string          `json:"name" gorm:"not null"`
 	ParentID        *string         `json:"parent_id"`
 	Description     string          `json:"description" gorm:"not null"`
-	Owner           string          `json:"owner" gorm:"not null"`
+	Owner           string          `json:"owner" gorm:"index; not null"`
 	Status          ComponentStatus `json:"status" gorm:"not null"`
 	SlackChannelID  *string         `json:"slack_channel_id"`
 	IsBotEnabled    bool            `json:"is_bot_enabled"`
-	BotKnowledge    []string        `json:"bot_knowledge" gorm:"type:jsonb"`
-	BotInstructions []string        `json:"bot_instructions" gorm:"type:jsonb"`
+	BotKnowledge    []string        `json:"bot_knowledge" gorm:"type:jsonb;serializer:json"`
+	BotInstructions []string        `json:"bot_instructions" gorm:"type:jsonb;serializer:json"`
 }
 
 type ComponentStatus string

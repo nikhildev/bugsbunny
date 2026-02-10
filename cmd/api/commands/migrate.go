@@ -4,21 +4,11 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
+	"github.com/nikhildev/bugsbunny/database"
 	"github.com/nikhildev/bugsbunny/models"
 )
-
-type dbConfig struct {
-	Host     string
-	Port     string
-	User     string
-	Password string
-	Name     string
-	SSLMode  string
-}
 
 var autopopulate bool
 
@@ -27,26 +17,15 @@ var migrateCmd = &cobra.Command{
 	Short: "Run database migrations",
 	Long:  `Apply database migrations to the BugsBunny database.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		cfg := loadDBConfig()
-		fmt.Printf("Running migrations... (host=%s db=%s)\n", cfg.Host, cfg.Name)
-		dsn := fmt.Sprintf(
-			"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-			cfg.Host,
-			cfg.Port,
-			cfg.User,
-			cfg.Password,
-			cfg.Name,
-			cfg.SSLMode,
-		)
-		db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+		cfg := database.GetDbConfig()
+		db, err := database.InitDB(cfg)
 		if err != nil {
-			return fmt.Errorf("open database: %w", err)
+			return fmt.Errorf("init database: %w", err)
 		}
+
 		if err := db.AutoMigrate(
 			&models.User{},
 			&models.Component{},
-			// &models.Issue{},
-			// &models.Comment{},
 		); err != nil {
 			return fmt.Errorf("run migrations: %w", err)
 		}
@@ -127,24 +106,4 @@ func seedComponents(db *gorm.DB) error {
 		}
 	}
 	return nil
-}
-
-func loadDBConfig() dbConfig {
-	v := viper.New()
-	v.SetEnvPrefix("DB")
-	v.SetConfigFile(".env")
-	v.SetConfigType("env")
-	err := v.ReadInConfig()
-	if err != nil {
-		return dbConfig{}
-	}
-
-	return dbConfig{
-		Host:     v.GetString("DB_HOST"),
-		Port:     v.GetString("DB_PORT"),
-		User:     v.GetString("DB_USER"),
-		Password: v.GetString("DB_PASSWORD"),
-		Name:     v.GetString("DB_NAME"),
-		SSLMode:  v.GetString("DB_SSLMODE"),
-	}
 }

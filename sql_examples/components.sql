@@ -1,1 +1,3 @@
-select * from components;
+-- select * from components;
+
+delete components;
