@@ -1,20 +1,35 @@
 package models
 
+import (
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+)
+
 type Issue struct {
 	BaseModel
 	Title         string      `json:"title" gorm:"size:255;not null"`
 	Description   string      `json:"description" gorm:"type:text;not null"`
 	Type          IssueType   `json:"type"`
 	Status        IssueStatus `json:"status"`
-	Assignee      *string     `json:"assignee" gorm:"size:64;not null"`
-	Reporter      *string     `json:"reporter" gorm:"size:64;not null"`
-	Components    []string    `json:"components" gorm:"not null"`
-	Attachments   []string    `json:"attachments"`
-	Tags          []string    `json:"tags"`
-	Priority      *Priority   `json:"priority"`
-	Severity      *Severity   `json:"severity"`
-	Collaborators []string    `json:"collaborators"`
-	CC            []string    `json:"cc"`
+	Assignee      string      `json:"assignee" gorm:"size:64;not null"`
+	Reporter      string      `json:"reporter" gorm:"size:64;not null"`
+	ComponentID   string      `json:"component_id" gorm:"not null"`
+	Attachments   []string    `json:"attachments" gorm:"type:jsonb;serializer:json"`
+	Priority      Priority    `json:"priority"`
+	Severity      Severity    `json:"severity"`
+	Collaborators []string    `json:"collaborators" gorm:"type:jsonb;serializer:json"`
+	CC            []string    `json:"cc" gorm:"type:jsonb;serializer:json"`
+}
+
+func (i *Issue) BeforeCreate(tx *gorm.DB) (err error) {
+	uuid, err := uuid.NewV7()
+
+	if err != nil {
+		return err
+	}
+
+	i.ID = uuid.String()
+	return nil
 }
 
 type IssueType string

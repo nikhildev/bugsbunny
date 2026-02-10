@@ -26,6 +26,7 @@ var migrateCmd = &cobra.Command{
 		if err := db.AutoMigrate(
 			&models.User{},
 			&models.Component{},
+			&models.Issue{},
 		); err != nil {
 			return fmt.Errorf("run migrations: %w", err)
 		}
@@ -41,6 +42,11 @@ var migrateCmd = &cobra.Command{
 				return fmt.Errorf("seed components: %w", err)
 			}
 			fmt.Println("Sample components inserted successfully")
+
+			if err := seedIssues(db); err != nil {
+				return fmt.Errorf("seed issues: %w", err)
+			}
+			fmt.Println("Sample issues inserted successfully")
 		}
 
 		return nil
@@ -103,6 +109,32 @@ func seedComponents(db *gorm.DB) error {
 		result := db.Where("name = ?", components[i].Name).FirstOrCreate(&components[i])
 		if result.Error != nil {
 			return fmt.Errorf("insert component %q: %w", components[i].Name, result.Error)
+		}
+	}
+	return nil
+}
+
+func seedIssues(db *gorm.DB) error {
+	issues := []models.Issue{
+		{
+			Title:         "Issue 1",
+			Description:   "Description 1",
+			Status:        models.NEW,
+			Reporter:      "019c48e9-ab2e-7c50-9e03-23f8af4fdd2b",
+			ComponentID:   "123e4567-e89b-12d3-a456-426614174000",
+			Type:          models.SUPPORT,
+			Attachments:   []string{},
+			Priority:      models.LOW_PRIORITY,
+			Severity:      models.LOW_SEVERITY,
+			Collaborators: []string{},
+			CC:            []string{},
+		},
+	}
+
+	for i := range issues {
+		result := db.Where("title = ?", issues[i].Title).FirstOrCreate(&issues[i])
+		if result.Error != nil {
+			return fmt.Errorf("insert issue %q: %w", issues[i].Title, result.Error)
 		}
 	}
 	return nil
