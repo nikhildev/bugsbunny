@@ -5,6 +5,8 @@ import (
 
 	"github.com/spf13/viper"
 
+	"errors"
+
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/option"
 )
@@ -21,17 +23,21 @@ func InitOpenAI() error {
 	if err != nil {
 		log.Fatalf("Error reading config file: %v", err)
 	}
-	// ctx := context.Background()
+	apiKey := v.GetString("OPENAI_API_KEY")
+
+	if apiKey == "" {
+		return errors.New("OPENAI_API_KEY is not set")
+	}
 	client := openai.NewClient(
-		option.WithAPIKey(v.GetString("OPENAI_API_KEY")),
+		option.WithAPIKey(apiKey),
 	)
 	openaiClient = &client
 	return nil
 }
 
-func GetOpenAIClient() *openai.Client {
+func GetOpenAIClient() (*openai.Client, error) {
 	if openaiClient == nil {
-		panic("OpenAI client not initialized")
+		return nil, errors.New("OpenAI client not initialized")
 	}
-	return openaiClient
+	return openaiClient, nil
 }
