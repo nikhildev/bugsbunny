@@ -23,6 +23,7 @@ type ComponentStatus string
 const (
 	ACTIVE   ComponentStatus = "active"
 	ARCHIVED ComponentStatus = "archived"
+	DELETED  ComponentStatus = "deleted"
 )
 
 func (c *Component) BeforeCreate(tx *gorm.DB) (err error) {
