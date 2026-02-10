@@ -17,4 +17,5 @@ func Execute() error {
 func init() {
 	rootCmd.AddCommand(runCmd)
 	rootCmd.AddCommand(migrateCmd)
+	rootCmd.AddCommand(serverCmd)
 }

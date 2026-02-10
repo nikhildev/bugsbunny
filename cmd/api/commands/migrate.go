@@ -103,7 +103,7 @@ func seedUsers(db *gorm.DB) error {
 
 func loadDBConfig() dbConfig {
 	v := viper.New()
-	v.SetEnvPrefix("DB")
+	v.SetEnvPrefix("BUGSBUNNY")
 	v.SetConfigFile(".env")
 	v.SetConfigType("env")
 	err := v.ReadInConfig()
