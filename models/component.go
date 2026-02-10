@@ -1,5 +1,10 @@
 package models
 
+import (
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+)
+
 type Component struct {
 	BaseModel
 	Name            string          `json:"name" gorm:"not null"`
@@ -19,3 +24,14 @@ const (
 	ACTIVE   ComponentStatus = "active"
 	ARCHIVED ComponentStatus = "archived"
 )
+
+func (c *Component) BeforeCreate(tx *gorm.DB) (err error) {
+	uuid, err := uuid.NewV7()
+
+	if err != nil {
+		return err
+	}
+
+	c.ID = uuid.String()
+	return nil
+}

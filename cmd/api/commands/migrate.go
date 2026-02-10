@@ -44,7 +44,7 @@ var migrateCmd = &cobra.Command{
 		}
 		if err := db.AutoMigrate(
 			&models.User{},
-			// &models.Component{},
+			&models.Component{},
 			// &models.Issue{},
 			// &models.Comment{},
 		); err != nil {
@@ -57,6 +57,11 @@ var migrateCmd = &cobra.Command{
 				return fmt.Errorf("seed users: %w", err)
 			}
 			fmt.Println("Sample users inserted successfully")
+
+			if err := seedComponents(db); err != nil {
+				return fmt.Errorf("seed components: %w", err)
+			}
+			fmt.Println("Sample components inserted successfully")
 		}
 
 		return nil
@@ -96,6 +101,27 @@ func seedUsers(db *gorm.DB) error {
 		result := db.Where("email = ?", users[i].Email).FirstOrCreate(&users[i])
 		if result.Error != nil {
 			return fmt.Errorf("insert user %q: %w", users[i].Username, result.Error)
+		}
+	}
+	return nil
+}
+
+func seedComponents(db *gorm.DB) error {
+	components := []models.Component{
+		{
+			Name:           "General",
+			Description:    "All general issues",
+			Owner:          "admin",
+			Status:         models.ACTIVE,
+			SlackChannelID: nil, // Fixed: do not use a non-existent channel, set to nil
+			IsBotEnabled:   false,
+		},
+	}
+
+	for i := range components {
+		result := db.Where("name = ?", components[i].Name).FirstOrCreate(&components[i])
+		if result.Error != nil {
+			return fmt.Errorf("insert component %q: %w", components[i].Name, result.Error)
 		}
 	}
 	return nil
