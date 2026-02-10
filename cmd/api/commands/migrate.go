@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 	"gorm.io/gorm"
 
-	"github.com/nikhildev/bugsbunny/database"
+	"github.com/nikhildev/bugsbunny/clients"
 	"github.com/nikhildev/bugsbunny/models"
 )
 
@@ -17,8 +17,8 @@ var migrateCmd = &cobra.Command{
 	Short: "Run database migrations",
 	Long:  `Apply database migrations to the BugsBunny database.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		cfg := database.GetDbConfig()
-		db, err := database.InitDB(cfg)
+		cfg := clients.GetDbConfig()
+		db, err := clients.InitDB(cfg)
 		if err != nil {
 			return fmt.Errorf("init database: %w", err)
 		}

@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/nikhildev/bugsbunny/database"
+	"github.com/nikhildev/bugsbunny/clients"
 	"github.com/nikhildev/bugsbunny/models"
 )
 
@@ -29,7 +29,7 @@ func CreateComponentHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, err := database.GetDbClient()
+	db, err := clients.GetDbClient()
 
 	result := db.Create(&component)
 	if result.Error != nil {

@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/nikhildev/bugsbunny/clients"
 	"github.com/nikhildev/bugsbunny/cmd/api/routes"
-	"github.com/nikhildev/bugsbunny/database"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -38,11 +38,11 @@ var serverCmd = &cobra.Command{
 		}
 
 		// Initialize database
-		_, err = database.InitDB(database.GetDbConfig())
+		_, err = clients.InitDB(clients.GetDbConfig())
 		if err != nil {
 			log.Fatalf("Error initializing database: %v", err)
 		}
-		defer database.CloseDbClient()
+		defer clients.CloseDbClient()
 		// Use migrate command to migrate the database
 
 		fmt.Println("Starting server on", serverConfig.Host, ":", serverConfig.Port)
