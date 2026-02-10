@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/nikhildev/bugsbunny/cmd/api/commands"
+	"github.com/nikhildev/bugsbunny/api/cmd/commands"
 )
 
 func main() {

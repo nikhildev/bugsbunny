@@ -3,7 +3,7 @@ package routes
 import (
 	"net/http"
 
-	"github.com/nikhildev/bugsbunny/cmd/api/routes/component"
+	"github.com/nikhildev/bugsbunny/api/routes/component"
 )
 
 func SetupRoutes() *http.ServeMux {

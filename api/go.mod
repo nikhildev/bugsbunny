@@ -1,9 +1,10 @@
-module github.com/nikhildev/bugsbunny
+module github.com/nikhildev/bugsbunny/api
 
 go 1.25.6
 
 require (
 	github.com/google/uuid v1.6.0
+	github.com/nikhildev/bugsbunny v0.0.0-20260210174239-b8d46fdddfd1
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	gorm.io/driver/postgres v1.6.0

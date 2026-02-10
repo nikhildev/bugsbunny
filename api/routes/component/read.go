@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/nikhildev/bugsbunny/clients"
-	"github.com/nikhildev/bugsbunny/models"
+	"github.com/nikhildev/bugsbunny/api/clients"
+	"github.com/nikhildev/bugsbunny/api/models"
 )
 
 func GetComponentByIHandler(w http.ResponseWriter, r *http.Request) {
