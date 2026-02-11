@@ -46,7 +46,19 @@ func UpdateIssueHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error updating issue", result.Error)
 		return
 	}
+	if result.RowsAffected == 0 {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("Issue not found"))
+		return
+	}
+
+	var updatedIssue models.Issue
+	if err := db.Where("id = ?", id).First(&updatedIssue).Error; err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println("Error fetching updated issue", err)
+		return
+	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(issue)
+	json.NewEncoder(w).Encode(updatedIssue)
 }
