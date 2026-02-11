@@ -1,6 +1,6 @@
 # BugsBunny
 
-Bug tracking and management application.
+Bug tracking and management application on AI steroids
 
 ## Project structure
 
