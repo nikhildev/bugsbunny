@@ -60,6 +60,9 @@ func init() {
 func seedUsers(db *gorm.DB) error {
 	users := []models.User{
 		{
+			BaseModel: models.BaseModel{
+				ID: "019c48e9-ab2e-7c50-9e03-23f8af4fdd2b",
+			},
 			Username: "admin",
 			Email:    "admin@bugsbunny.dev",
 			Password: "admin123",
@@ -67,6 +70,9 @@ func seedUsers(db *gorm.DB) error {
 			IsActive: true,
 		},
 		{
+			BaseModel: models.BaseModel{
+				ID: "019c48e9-ab2e-7c50-9e03-23f8af4fdd2c",
+			},
 			Username: "janedoe",
 			Email:    "jane.doe@bugsbunny.dev",
 			Password: "jane123",
@@ -74,6 +80,9 @@ func seedUsers(db *gorm.DB) error {
 			IsActive: true,
 		},
 		{
+			BaseModel: models.BaseModel{
+				ID: "019c48e9-ab2e-7c50-9e03-23f8af4fdd2d",
+			},
 			Username: "johndoe",
 			Email:    "john.doe@bugsbunny.dev",
 			Password: "john123",
@@ -94,6 +103,9 @@ func seedUsers(db *gorm.DB) error {
 func seedComponents(db *gorm.DB) error {
 	components := []models.Component{
 		{
+			BaseModel: models.BaseModel{
+				ID: "019c48e9-ab2e-7c50-9e03-23f8af4fdd2e",
+			},
 			Name:            "General",
 			Description:     "All general issues",
 			Owner:           "admin",
@@ -120,8 +132,8 @@ func seedIssues(db *gorm.DB) error {
 			Title:         "Issue 1",
 			Description:   "Description 1",
 			Status:        models.NEW,
-			Reporter:      "019c48e9-ab2e-7c50-9e03-23f8af4fdd2b",
-			ComponentID:   "123e4567-e89b-12d3-a456-426614174000",
+			Reporter:      "019c48e9-ab2e-7c50-9e03-23f8af4fdd2c",
+			ComponentID:   "019c48e9-ab2e-7c50-9e03-23f8af4fdd2e",
 			Type:          models.SUPPORT,
 			Attachments:   []string{},
 			Priority:      models.LOW_PRIORITY,
