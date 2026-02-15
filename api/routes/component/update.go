@@ -6,8 +6,9 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/nikhildev/bugsbunny/clients"
-	"github.com/nikhildev/bugsbunny/models"
+	"github.com/nikhildev/bugsbunny/api/clients"
+	"github.com/nikhildev/bugsbunny/api/common"
+	"github.com/nikhildev/bugsbunny/api/models"
 )
 
 func UpdateComponentHandler(w http.ResponseWriter, r *http.Request) {
@@ -35,31 +36,7 @@ func UpdateComponentHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Build updates map with only the fields present in the request
-	updates := make(map[string]any)
-	if val, ok := requestData["name"]; ok {
-		updates["name"] = val
-	}
-	if val, ok := requestData["parent_id"]; ok {
-		updates["parent_id"] = val
-	}
-	if val, ok := requestData["description"]; ok {
-		updates["description"] = val
-	}
-	if val, ok := requestData["owner"]; ok {
-		updates["owner"] = val
-	}
-	if val, ok := requestData["slack_channel_id"]; ok {
-		updates["slack_channel_id"] = val
-	}
-	if val, ok := requestData["is_bot_enabled"]; ok {
-		updates["is_bot_enabled"] = val
-	}
-	if val, ok := requestData["bot_knowledge"]; ok {
-		updates["bot_knowledge"] = val
-	}
-	if val, ok := requestData["bot_instructions"]; ok {
-		updates["bot_instructions"] = val
-	}
+	updates := common.ExtractUpdates(requestData, models.Component{})
 
 	// Return error if no fields to update
 	if len(updates) == 0 {

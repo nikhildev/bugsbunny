@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/nikhildev/bugsbunny/api/clients"
+	"github.com/nikhildev/bugsbunny/api/common"
 	"github.com/nikhildev/bugsbunny/api/models"
 )
 
@@ -25,11 +26,22 @@ func UpdateIssueHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var issue models.Issue
-	err = json.Unmarshal(body, &issue)
+	// Parse request body into a map to detect which fields were provided
+	var requestData map[string]any
+	err = json.Unmarshal(body, &requestData)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Println("Error unmarshalling request body", err)
+		return
+	}
+
+	// Build updates map with only the fields present in the request
+	updates := common.ExtractUpdates(requestData, models.Issue{})
+
+	// Return error if no fields to update
+	if len(updates) == 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("No fields to update"))
 		return
 	}
 
@@ -40,7 +52,7 @@ func UpdateIssueHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := db.Model(&models.Issue{}).Where("id = ?", id).Updates(issue)
+	result := db.Model(&models.Issue{}).Where("id = ?", id).Updates(updates)
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Println("Error updating issue", result.Error)
