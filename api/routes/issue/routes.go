@@ -2,6 +2,8 @@ package issue
 
 import (
 	"net/http"
+
+	"github.com/nikhildev/bugsbunny/api/routes/comments"
 )
 
 func RegisterIssueRoutes(mux *http.ServeMux) {
@@ -10,4 +12,5 @@ func RegisterIssueRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /issues", GetIssuesHandler)
 	mux.HandleFunc("PUT /issues/{id}", UpdateIssueHandler)
 	mux.HandleFunc("DELETE /issues/{id}", DeleteIssueByIDHandler)
+	mux.HandleFunc("POST /issues/{id}/comments", comments.CreateCommentHandler)
 }
