@@ -27,12 +27,12 @@ const (
 )
 
 func (c *Component) BeforeCreate(tx *gorm.DB) (err error) {
-	uuid, err := uuid.NewV7()
-
-	if err != nil {
-		return err
+	if c.ID == "" {
+		uuid, err := uuid.NewV7()
+		if err != nil {
+			return err
+		}
+		c.ID = uuid.String()
 	}
-
-	c.ID = uuid.String()
 	return nil
 }

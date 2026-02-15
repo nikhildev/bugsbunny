@@ -27,6 +27,7 @@ var migrateCmd = &cobra.Command{
 			&models.User{},
 			&models.Component{},
 			&models.Issue{},
+			&models.Change{},
 		); err != nil {
 			return fmt.Errorf("run migrations: %w", err)
 		}
@@ -92,7 +93,7 @@ func seedUsers(db *gorm.DB) error {
 	}
 
 	for i := range users {
-		result := db.Where("email = ?", users[i].Email).FirstOrCreate(&users[i])
+		result := db.Where("id = ?", users[i].ID).FirstOrCreate(&users[i])
 		if result.Error != nil {
 			return fmt.Errorf("insert user %q: %w", users[i].Username, result.Error)
 		}
@@ -118,7 +119,7 @@ func seedComponents(db *gorm.DB) error {
 	}
 
 	for i := range components {
-		result := db.Where("name = ?", components[i].Name).FirstOrCreate(&components[i])
+		result := db.Where("id = ?", components[i].ID).FirstOrCreate(&components[i])
 		if result.Error != nil {
 			return fmt.Errorf("insert component %q: %w", components[i].Name, result.Error)
 		}
