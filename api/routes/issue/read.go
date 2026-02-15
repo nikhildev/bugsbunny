@@ -6,10 +6,12 @@ import (
 	"net/http"
 
 	"github.com/nikhildev/bugsbunny/api/clients"
+	"github.com/nikhildev/bugsbunny/api/common"
 	"github.com/nikhildev/bugsbunny/api/models"
 )
 
 func GetIssueByIDHandler(w http.ResponseWriter, r *http.Request) {
+	common.EnableCors(w)
 	id := r.PathValue("id")
 	if id == "" {
 		w.WriteHeader(http.StatusBadRequest)
@@ -38,6 +40,7 @@ func GetIssueByIDHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetIssuesHandler(w http.ResponseWriter, r *http.Request) {
+	common.EnableCors(w)
 	db, err := clients.GetDbClient()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
