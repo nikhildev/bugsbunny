@@ -28,6 +28,7 @@ var migrateCmd = &cobra.Command{
 			&models.Component{},
 			&models.Issue{},
 			&models.Change{},
+			&models.Comment{},
 		); err != nil {
 			return fmt.Errorf("run migrations: %w", err)
 		}

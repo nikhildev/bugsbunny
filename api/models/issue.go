@@ -19,6 +19,7 @@ type Issue struct {
 	Severity      Severity    `json:"severity"`
 	Collaborators []string    `json:"collaborators" gorm:"type:jsonb;serializer:json"`
 	CC            []string    `json:"cc" gorm:"type:jsonb;serializer:json"`
+	Comments      []Comment   `json:"comments" gorm:"foreignKey:IssueID;references:ID"`
 }
 
 func (i *Issue) BeforeCreate(tx *gorm.DB) (err error) {
