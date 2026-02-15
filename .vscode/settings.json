@@ -11,5 +11,79 @@
             "username": "postgres",
             "password": "postgres"
         }
-    ]
+    ],
+    // Go settings
+    "go.testEnvVars": {
+        "DB_HOST": "localhost",
+        "DB_PORT": "5432",
+        "DB_USER": "postgres",
+        "DB_PASSWORD": "postgres",
+        "DB_NAME": "bugsbunny_test",
+        "DB_SSL_MODE": "disable"
+    },
+    "go.testFlags": ["-v", "-count=1"],
+    "go.coverOnSave": false,
+    "go.lintTool": "golangci-lint",
+    "go.lintOnSave": "package",
+    "go.buildOnSave": "off",
+    "go.formatTool": "goimports",
+    "go.useLanguageServer": true,
+    "go.toolsManagement.autoUpdate": true,
+    "[go]": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        },
+        "editor.defaultFormatter": "golang.go"
+    },
+    "[go.mod]": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        }
+    },
+    // TypeScript/JavaScript settings
+    "[typescript]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[typescriptreact]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[javascript]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[json]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    // File associations
+    "files.associations": {
+        "*.tmpl": "html",
+        "*.gohtml": "html"
+    },
+    // Exclude patterns
+    "files.exclude": {
+        "**/.git": true,
+        "**/.DS_Store": true,
+        "**/node_modules": true,
+        "**/bin": true,
+        "**/*.test": true
+    },
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/bin": true,
+        "**/*.lock": true,
+        "**/coverage.out": true,
+        "**/coverage.html": true
+    },
+    // Terminal settings
+    "terminal.integrated.env.osx": {
+        "GOPATH": "${env:HOME}/go"
+    },
+    "terminal.integrated.env.linux": {
+        "GOPATH": "${env:HOME}/go"
+    }
 }

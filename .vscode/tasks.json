@@ -1,0 +1,224 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build API",
+      "type": "shell",
+      "command": "go build -o bin/bugsbunny",
+      "options": {
+        "cwd": "${workspaceFolder}/api"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": ["$go"]
+    },
+    {
+      "label": "Test API",
+      "type": "shell",
+      "command": "go test -v ./...",
+      "options": {
+        "cwd": "${workspaceFolder}/api"
+      },
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": ["$go"]
+    },
+    {
+      "label": "Test API (with coverage)",
+      "type": "shell",
+      "command": "go test -v -coverprofile=coverage.out ./... && go tool cover -html=coverage.out -o coverage.html",
+      "options": {
+        "cwd": "${workspaceFolder}/api"
+      },
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": ["$go"]
+    },
+    {
+      "label": "Run API Migrations",
+      "type": "shell",
+      "command": "go run main.go migrate",
+      "options": {
+        "cwd": "${workspaceFolder}/api",
+        "env": {
+          "DB_HOST": "localhost",
+          "DB_PORT": "5432",
+          "DB_USER": "postgres",
+          "DB_PASSWORD": "postgres",
+          "DB_NAME": "bugsbunny",
+          "DB_SSL_MODE": "disable"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Start API Server",
+      "type": "shell",
+      "command": "go run main.go server",
+      "options": {
+        "cwd": "${workspaceFolder}/api",
+        "env": {
+          "DB_HOST": "localhost",
+          "DB_PORT": "5432",
+          "DB_USER": "postgres",
+          "DB_PASSWORD": "postgres",
+          "DB_NAME": "bugsbunny",
+          "DB_SSL_MODE": "disable"
+        }
+      },
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": {
+        "owner": "go",
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*initializing.*",
+          "endsPattern": "^.*server.*started.*|^.*listening.*"
+        }
+      }
+    },
+    {
+      "label": "Build Frontend",
+      "type": "shell",
+      "command": "bun run build",
+      "options": {
+        "cwd": "${workspaceFolder}/frontend"
+      },
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Start Frontend Dev Server",
+      "type": "shell",
+      "command": "bun --hot src/index.ts",
+      "options": {
+        "cwd": "${workspaceFolder}/frontend"
+      },
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^(.*)$",
+          "file": 1
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*starting.*",
+          "endsPattern": "^.*listening.*|^.*server.*started.*"
+        }
+      }
+    },
+    {
+      "label": "Install Frontend Dependencies",
+      "type": "shell",
+      "command": "bun install",
+      "options": {
+        "cwd": "${workspaceFolder}/frontend"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Install API Dependencies",
+      "type": "shell",
+      "command": "go mod download && go mod tidy",
+      "options": {
+        "cwd": "${workspaceFolder}/api"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Start Full Stack",
+      "dependsOn": ["Start API Server", "Start Frontend Dev Server"],
+      "dependsOrder": "parallel",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Clean Build Artifacts",
+      "type": "shell",
+      "command": "rm -rf bin coverage.out coverage.html",
+      "options": {
+        "cwd": "${workspaceFolder}/api"
+      },
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Format API Code",
+      "type": "shell",
+      "command": "go fmt ./...",
+      "options": {
+        "cwd": "${workspaceFolder}/api"
+      },
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Lint API Code",
+      "type": "shell",
+      "command": "golangci-lint run ./... || echo 'golangci-lint not installed. Run: brew install golangci-lint'",
+      "options": {
+        "cwd": "${workspaceFolder}/api"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": ["$go"]
+    }
+  ]
+}
