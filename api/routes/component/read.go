@@ -34,7 +34,9 @@ func GetComponentByIHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(component)
+	if err := json.NewEncoder(w).Encode(component); err != nil {
+		fmt.Println("Error encoding component", err)
+	}
 }
 
 func GetComponentsHandler(w http.ResponseWriter, r *http.Request) {
@@ -54,5 +56,7 @@ func GetComponentsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(components)
+	if err := json.NewEncoder(w).Encode(components); err != nil {
+		fmt.Println("Error encoding components", err)
+	}
 }
