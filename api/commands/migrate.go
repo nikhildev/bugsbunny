@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"log/slog"
 
 	"github.com/spf13/cobra"
 	"gorm.io/gorm"
@@ -32,23 +33,29 @@ var migrateCmd = &cobra.Command{
 		); err != nil {
 			return fmt.Errorf("run migrations: %w", err)
 		}
-		fmt.Println("Migrations applied successfully")
+
+		if err := createDefaultUsers(db); err != nil {
+			return fmt.Errorf("create default users: %w", err)
+		}
+		slog.Info("Default users created successfully")
+
+		slog.Info("Migrations applied successfully")
 
 		if autopopulate {
 			if err := seedUsers(db); err != nil {
 				return fmt.Errorf("seed users: %w", err)
 			}
-			fmt.Println("Sample users inserted successfully")
+			slog.Info("Sample users inserted successfully")
 
 			if err := seedComponents(db); err != nil {
 				return fmt.Errorf("seed components: %w", err)
 			}
-			fmt.Println("Sample components inserted successfully")
+			slog.Info("Sample components inserted successfully")
 
 			if err := seedIssues(db); err != nil {
 				return fmt.Errorf("seed issues: %w", err)
 			}
-			fmt.Println("Sample issues inserted successfully")
+			slog.Info("Sample issues inserted successfully")
 		}
 
 		return nil
@@ -59,18 +66,36 @@ func init() {
 	migrateCmd.Flags().BoolVar(&autopopulate, "autopopulate", false, "Insert sample data into the users table after migration")
 }
 
-func seedUsers(db *gorm.DB) error {
-	users := []models.User{
+func createDefaultUsers(db *gorm.DB) error {
+	users := []*models.User{
 		{
-			BaseModel: models.BaseModel{
-				ID: "019c48e9-ab2e-7c50-9e03-23f8af4fdd2b",
-			},
 			Username: "admin",
 			Email:    "admin@bugsbunny.dev",
 			Password: "admin123",
 			Role:     models.Admin,
 			IsActive: true,
 		},
+		{
+			Username: "bot",
+			Email:    "bot@bugsbunny.dev",
+			Password: "bot123",
+			Role:     models.Editor,
+			IsActive: true,
+		},
+	}
+
+	result := db.Create(users)
+	if result.Error != nil {
+		slog.Error("Failed to create default users", "error", result.Error)
+		return fmt.Errorf("create default users: %w", result.Error)
+	}
+	slog.Info("Default users created successfully")
+	return nil
+}
+
+func seedUsers(db *gorm.DB) error {
+	users := []models.User{
+
 		{
 			BaseModel: models.BaseModel{
 				ID: "019c48e9-ab2e-7c50-9e03-23f8af4fdd2c",
@@ -96,9 +121,11 @@ func seedUsers(db *gorm.DB) error {
 	for i := range users {
 		result := db.Where("id = ?", users[i].ID).FirstOrCreate(&users[i])
 		if result.Error != nil {
+			slog.Error("Failed to insert user", "user", users[i], "error", result.Error)
 			return fmt.Errorf("insert user %q: %w", users[i].Username, result.Error)
 		}
 	}
+	slog.Info("Sample users inserted successfully")
 	return nil
 }
 
@@ -125,6 +152,7 @@ func seedComponents(db *gorm.DB) error {
 			return fmt.Errorf("insert component %q: %w", components[i].Name, result.Error)
 		}
 	}
+	slog.Info("Sample components inserted successfully")
 	return nil
 }
 
@@ -148,8 +176,10 @@ func seedIssues(db *gorm.DB) error {
 	for i := range issues {
 		result := db.Where("title = ?", issues[i].Title).FirstOrCreate(&issues[i])
 		if result.Error != nil {
+			slog.Error("Failed to insert issue", "issue", issues[i], "error", result.Error)
 			return fmt.Errorf("insert issue %q: %w", issues[i].Title, result.Error)
 		}
 	}
+	slog.Info("Sample issues inserted successfully")
 	return nil
 }
