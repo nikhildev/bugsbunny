@@ -1,1 +1,5 @@
 @import "../styles/globals.css";
+
+main {
+    padding: 1rem;
+}

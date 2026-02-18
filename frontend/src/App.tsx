@@ -14,7 +14,7 @@ export function App() {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <SidebarTrigger />
+        {/* <SidebarTrigger /> */}
         <main className="flex-1">
           <Routes>
             <Route path="/" element={<Home />} />
