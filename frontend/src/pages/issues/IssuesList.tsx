@@ -2,23 +2,8 @@ import { DataTable, type TableColumn } from "@/components/DataTable";
 import { getAllIssues } from "./api/api";
 import { Badge } from "@/components/ui/badge";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { format, formatISO, parseISO } from "date-fns";
 import { getLocalisedTimestamp } from "@/lib/datetime";
-import { Button } from "@/components/base/buttons/button";
-
-interface Issue {
-  id: string;
-  title: string;
-  description: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-  type: string;
-  reporter: string;
-  componentId: string;
-  priority: string;
-  severity: string;
-}
+import type { Issue } from "@/models/issue";
 
 export const columns: TableColumn<Issue, any>[] = [
   {
@@ -29,21 +14,14 @@ export const columns: TableColumn<Issue, any>[] = [
     header: "Created At",
     accessorKey: "created_at",
     cell: ({ row }) => {
-      return <>{getLocalisedTimestamp(row.getValue("created_at"))}</>;
+      return <>{getLocalisedTimestamp(row.getValue("created_at") as string)}</>;
     },
   },
   {
     header: "Updated At",
     accessorKey: "updated_at",
     cell: ({ row }) => {
-      return (
-        <>
-          {format(
-            parseISO(String(row.getValue("updated_at"))),
-            "dd.MM.yyyy HH:mm",
-          )}
-        </>
-      );
+      return <>{getLocalisedTimestamp(row.getValue("updated_at") as string)}</>;
     },
   },
   {
@@ -79,7 +57,7 @@ export const columns: TableColumn<Issue, any>[] = [
 
 export const IssuesList = () => {
   const queryClient = useQueryClient();
-  const { data: issues } = useQuery({
+  const { data: issues, isLoading } = useQuery({
     queryKey: ["issues"],
     queryFn: getAllIssues,
   });
@@ -87,9 +65,6 @@ export const IssuesList = () => {
   return (
     <div>
       <h1 className="text-2xl font-bold mb-4">Issues</h1>
-      <Button color="primary" size="md">
-        Publish now
-      </Button>
 
       <DataTable columns={columns} data={(issues || []) as Issue[]} />
     </div>

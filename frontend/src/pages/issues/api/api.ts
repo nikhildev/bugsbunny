@@ -1,12 +1,4 @@
-interface Issue {
-  id: string;
-  title: string;
-  description: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-  type: string;
-}
+import type { Issue } from "@/models/issue";
 
 export const getAllIssues = async (): Promise<Issue[] | undefined> => {
   const res = await fetch("http://localhost:8080/issues");

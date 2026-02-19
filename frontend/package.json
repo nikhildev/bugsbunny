@@ -9,25 +9,25 @@
     "build": "bun run build.ts"
   },
   "dependencies": {
+    "@internationalized/date": "^3.11.0",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-slot": "^1.2.3",
+    "@react-stately/utils": "^3.11.0",
     "@tanstack/react-query": "^5.90.21",
     "@tanstack/react-table": "^8.21.3",
-    "@untitledui/icons": "^0.0.21",
+    "@untitledui/file-icons": "^0.0.9",
     "bun-plugin-tailwind": "^0.1.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.574.0",
+    "motion": "^12.34.2",
     "radix-ui": "^1.4.3",
     "react": "^19",
-    "react-aria-components": "^1.15.1",
+    "react-aria": "^3.46.0",
     "react-dom": "^19",
-    "react-router": "^7.13.0",
-    "tailwind-merge": "^3.5.0",
-    "tailwindcss-animate": "^1.0.7",
-    "tailwindcss-react-aria-components": "^2.0.1"
+    "react-router": "^7.13.0"
   },
   "devDependencies": {
     "@types/bun": "latest",
