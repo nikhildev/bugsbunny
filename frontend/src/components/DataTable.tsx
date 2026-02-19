@@ -1,11 +1,12 @@
 "use client"
 
+import type * as React from "react"
 import {
-  type ColumnDef,
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table"
+import type { ColumnDef } from "@tanstack/table-core"
 
 import {
   Table,
@@ -16,8 +17,22 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
+/** Column shape for DataTable (avoids duplicate @tanstack/table-core type identity across files) */
+export interface TableColumn<TData, TValue = unknown> {
+  id?: string
+  header?: string | ((info: unknown) => React.ReactNode)
+  accessorKey?: keyof TData | (string & {})
+  accessorFn?: (row: TData) => TValue
+  cell?: (info: {
+    row: { original: TData; getValue: (columnId?: string) => unknown };
+    getValue?: () => TValue;
+  }) => React.ReactNode
+  footer?: string | ((info: unknown) => React.ReactNode)
+  meta?: Record<string, unknown>
+}
+
+export interface DataTableProps<TData, TValue> {
+  columns: TableColumn<TData, TValue>[]
   data: TData[]
 }
 
@@ -27,7 +42,7 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
-    columns,
+    columns: columns as ColumnDef<TData, TValue>[],
     getCoreRowModel: getCoreRowModel(),
   })
 

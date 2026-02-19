@@ -1,8 +1,8 @@
-import { DataTable } from "@/components/DataTable";
+import { DataTable, type TableColumn } from "@/components/DataTable";
 import { getAllIssues } from "./api/api";
-import { useState, useEffect } from "react";
-import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { format, formatISO, parseISO } from "date-fns";
 
 interface Issue {
   id: string;
@@ -18,7 +18,7 @@ interface Issue {
   severity: string;
 }
 
-export const columns: ColumnDef<Issue, any>[] = [
+export const columns: TableColumn<Issue, any>[] = [
   {
     header: "Title",
     accessorKey: "title",
@@ -26,10 +26,30 @@ export const columns: ColumnDef<Issue, any>[] = [
   {
     header: "Created At",
     accessorKey: "created_at",
+    cell: ({ row }) => {
+      return (
+        <>
+          {format(
+            parseISO(String(row.getValue("created_at"))),
+            "dd.MM.yyyy HH:mm",
+          )}
+        </>
+      );
+    },
   },
   {
     header: "Updated At",
     accessorKey: "updated_at",
+    cell: ({ row }) => {
+      return (
+        <>
+          {format(
+            parseISO(String(row.getValue("updated_at"))),
+            "dd.MM.yyyy HH:mm",
+          )}
+        </>
+      );
+    },
   },
   {
     header: "Type",
@@ -63,13 +83,16 @@ export const columns: ColumnDef<Issue, any>[] = [
 ];
 
 export const IssuesList = () => {
-  const [issues, setIssues] = useState<Issue[]>([]);
-  useEffect(() => {
-    getAllIssues().then(setIssues);
-  }, []);
+  const queryClient = useQueryClient();
+  const { data: issues } = useQuery({
+    queryKey: ["issues"],
+    queryFn: getAllIssues,
+  });
 
-  return <div>
-    <h1>Issues</h1>
-    <DataTable columns={columns} data={issues} />
-  </div>;
+  return (
+    <div>
+      <h1>Issues</h1>
+      <DataTable columns={columns} data={(issues || []) as Issue[]} />
+    </div>
+  );
 };

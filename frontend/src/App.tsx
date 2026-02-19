@@ -6,24 +6,27 @@ import { AppSidebar } from "./components/AppSidebar";
 import {
   SidebarInset,
   SidebarProvider,
-  SidebarTrigger,
+  // SidebarTrigger,
 } from "./components/ui/sidebar";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 export function App() {
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        {/* <SidebarTrigger /> */}
-        <main className="flex-1">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/issues" element={<IssuesList />} />
-          </Routes>
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
+    <QueryClientProvider client={queryClient}>
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset>
+          {/* <SidebarTrigger /> */}
+          <main className="flex-1">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/issues" element={<IssuesList />} />
+            </Routes>
+          </main>
+        </SidebarInset>
+      </SidebarProvider>
+    </QueryClientProvider>
   );
 }
-
-export default App;
