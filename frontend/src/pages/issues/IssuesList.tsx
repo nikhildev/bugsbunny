@@ -3,6 +3,8 @@ import { getAllIssues } from "./api/api";
 import { Badge } from "@/components/ui/badge";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, formatISO, parseISO } from "date-fns";
+import { getLocalisedTimestamp } from "@/lib/datetime";
+import { Button } from "@/components/base/buttons/button";
 
 interface Issue {
   id: string;
@@ -27,14 +29,7 @@ export const columns: TableColumn<Issue, any>[] = [
     header: "Created At",
     accessorKey: "created_at",
     cell: ({ row }) => {
-      return (
-        <>
-          {format(
-            parseISO(String(row.getValue("created_at"))),
-            "dd.MM.yyyy HH:mm",
-          )}
-        </>
-      );
+      return <>{getLocalisedTimestamp(row.getValue("created_at"))}</>;
     },
   },
   {
@@ -91,7 +86,11 @@ export const IssuesList = () => {
 
   return (
     <div>
-      <h1>Issues</h1>
+      <h1 className="text-2xl font-bold mb-4">Issues</h1>
+      <Button color="primary" size="md">
+        Publish now
+      </Button>
+
       <DataTable columns={columns} data={(issues || []) as Issue[]} />
     </div>
   );

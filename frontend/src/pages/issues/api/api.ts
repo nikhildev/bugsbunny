@@ -1,6 +1,18 @@
-const getAllIssues = async () => {
-  const response = await fetch("http://localhost:8080/issues");
-  return response.json();
-};
+interface Issue {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  type: string;
+}
 
-export { getAllIssues };
+export const getAllIssues = async (): Promise<Issue[] | undefined> => {
+  const res = await fetch("http://localhost:8080/issues");
+  if (!res.ok) {
+    return undefined;
+  }
+  const data = await res.json();
+  return data as Issue[] | undefined;
+};
