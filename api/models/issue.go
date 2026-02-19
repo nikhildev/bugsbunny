@@ -10,15 +10,16 @@ type Issue struct {
 	Title         string      `json:"title" gorm:"size:255;not null"`
 	Description   string      `json:"description" gorm:"type:text;not null"`
 	Type          IssueType   `json:"type"`
-	Status        IssueStatus `json:"status"`
-	Assignee      string      `json:"assignee" gorm:"size:64;not null"`
-	Reporter      string      `json:"reporter" gorm:"size:64;not null"`
-	ComponentID   string      `json:"component_id" gorm:"not null"`
+	Status        IssueStatus `json:"status" gorm:"not null index default:new"`
+	Assignee      string      `json:"assignee" gorm:"size:64;not null index"`
+	ReporterId    string      `json:"reporter_id" gorm:"type:uuid; not null"`
+	Reporter      User        `json:"reporter" gorm:"foreignKey:ReporterId;references:ID"`
+	ComponentID   string      `json:"component_id" gorm:"not null index"`
 	Attachments   []string    `json:"attachments" gorm:"type:jsonb;serializer:json"`
-	Priority      Priority    `json:"priority"`
-	Severity      Severity    `json:"severity"`
+	Priority      Priority    `json:"priority" gorm:"not null index default:low"`
+	Severity      Severity    `json:"severity" gorm:"not null index default:low"`
 	Collaborators []string    `json:"collaborators" gorm:"type:jsonb;serializer:json"`
-	CC            []string    `json:"cc" gorm:"type:jsonb;serializer:json"`
+	CC            []string    `json:"cc" gorm:"type:jsonb;serializer:json index"`
 	Comments      []Comment   `json:"comments" gorm:"foreignKey:IssueID;references:ID"`
 }
 
