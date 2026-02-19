@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 	"gorm.io/gorm"
 
@@ -12,6 +13,7 @@ import (
 )
 
 var autopopulate bool
+var resetDb bool
 
 var migrateCmd = &cobra.Command{
 	Use:   "migrate",
@@ -22,6 +24,13 @@ var migrateCmd = &cobra.Command{
 		db, err := clients.InitDB(cfg)
 		if err != nil {
 			return fmt.Errorf("init database: %w", err)
+		}
+
+		if resetDb {
+			if err := db.Migrator().DropTable(&models.User{}, &models.Component{}, &models.Issue{}, &models.Change{}, &models.Comment{}); err != nil {
+				return fmt.Errorf("drop tables: %w", err)
+			}
+			slog.Info("Tables dropped successfully")
 		}
 
 		if err := db.AutoMigrate(
@@ -64,6 +73,7 @@ var migrateCmd = &cobra.Command{
 
 func init() {
 	migrateCmd.Flags().BoolVar(&autopopulate, "autopopulate", false, "Insert sample data into the users table after migration")
+	migrateCmd.Flags().BoolVar(&resetDb, "resetdb", false, "Reset the database before running migrations")
 }
 
 func createDefaultUsers(db *gorm.DB) error {
@@ -157,29 +167,20 @@ func seedComponents(db *gorm.DB) error {
 }
 
 func seedIssues(db *gorm.DB) error {
-	issues := []models.Issue{
-		{
-			Title:         "Issue 1",
-			Description:   "Description 1",
-			Status:        models.NEW,
-			Reporter:      "019c48e9-ab2e-7c50-9e03-23f8af4fdd2c",
-			ComponentID:   "019c48e9-ab2e-7c50-9e03-23f8af4fdd2e",
-			Type:          models.SUPPORT,
-			Attachments:   []string{},
-			Priority:      models.LOW_PRIORITY,
-			Severity:      models.LOW_SEVERITY,
-			Collaborators: []string{},
-			CC:            []string{},
-		},
+	issue := models.Issue{
+		Title:       "Issue 1",
+		Description: "Description 1",
+		Status:      models.NEW,
+		ReporterId:  uuid.MustParse("019c48e9-ab2e-7c50-9e03-23f8af4fdd2c").String(),
+		ComponentID: uuid.MustParse("019c48e9-ab2e-7c50-9e03-23f8af4fdd2e").String(),
+		Type:        models.SUPPORT,
 	}
 
-	for i := range issues {
-		result := db.Where("title = ?", issues[i].Title).FirstOrCreate(&issues[i])
-		if result.Error != nil {
-			slog.Error("Failed to insert issue", "issue", issues[i], "error", result.Error)
-			return fmt.Errorf("insert issue %q: %w", issues[i].Title, result.Error)
-		}
+	result := db.Create(&issue)
+	if result.Error != nil {
+		slog.Error("Failed to insert issue", "error", result.Error)
+		return fmt.Errorf("insert issue: %w", result.Error)
 	}
-	slog.Info("Sample issues inserted successfully")
+	slog.Info("Sample issue inserted successfully")
 	return nil
 }
