@@ -1,0 +1,2 @@
+- Whenever generating UUID, always use UUID7 format
+- Whenever generating test files go, try to keep the common code modular and in the test_utils directory so that they can be used from other locations

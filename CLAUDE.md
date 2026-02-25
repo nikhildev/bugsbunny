@@ -1,2 +1,12 @@
-- Whenever generating UUID, always use UUID7 format
-- Whenever generating test files go, try to keep the common code modular and in the test_utils directory so that they can be used from other locations
+# CLAUDE.md
+
+# Project Configuration
+See AGENTS.md for detailed project instructions.
+
+# Claude-Specific Extensions
+## Skills Available
+- /commit - Smart commit messages
+- /review - Code review helper
+
+## Sub-agents
+See .claude/agents/ for custom agent definitions.
