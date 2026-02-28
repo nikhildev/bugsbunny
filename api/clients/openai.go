@@ -1,10 +1,6 @@
 package clients
 
 import (
-	"log"
-
-	"github.com/spf13/viper"
-
 	"errors"
 
 	"github.com/openai/openai-go/v3"
@@ -13,24 +9,11 @@ import (
 
 var openaiClient *openai.Client = nil
 
-func InitOpenAI() error {
-	v := viper.New()
-	v.AutomaticEnv()
-	v.SetEnvPrefix("OPENAI")
-	v.SetConfigFile(".env")
-	v.SetConfigType("env")
-	err := v.ReadInConfig()
-	if err != nil {
-		log.Fatalf("Error reading config file: %v", err)
-	}
-	apiKey := v.GetString("OPENAI_API_KEY")
-
-	if apiKey == "" {
+func InitOpenAI(cfg OpenAIConfig) error {
+	if cfg.APIKey == "" {
 		return errors.New("OPENAI_API_KEY is not set")
 	}
-	client := openai.NewClient(
-		option.WithAPIKey(apiKey),
-	)
+	client := openai.NewClient(option.WithAPIKey(cfg.APIKey))
 	openaiClient = &client
 	return nil
 }
