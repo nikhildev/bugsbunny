@@ -9,7 +9,7 @@ import (
 	"github.com/nikhildev/bugsbunny/api/models"
 )
 
-func GetComponentByIHandler(w http.ResponseWriter, r *http.Request) {
+func GetComponentByIDHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	if id == "" {
 		w.WriteHeader(http.StatusBadRequest)
