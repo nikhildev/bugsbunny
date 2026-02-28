@@ -1,7 +1,7 @@
 package main
 
-import "github.com/nikhildev/bugsbunny/api/commands"
+import "github.com/nikhildev/bugsbunny/api/internal/cli"
 
 func main() {
-	commands.Execute()
+	cli.Execute()
 }
