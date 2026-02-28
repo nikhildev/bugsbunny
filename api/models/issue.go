@@ -26,13 +26,13 @@ type Issue struct {
 }
 
 func (i *Issue) BeforeCreate(tx *gorm.DB) (err error) {
-	uuid, err := uuid.NewV7()
-
-	if err != nil {
-		return err
+	if i.ID == "" {
+		id, err := uuid.NewV7()
+		if err != nil {
+			return err
+		}
+		i.ID = id.String()
 	}
-
-	i.ID = uuid.String()
 	return nil
 }
 
@@ -49,12 +49,14 @@ const (
 type IssueStatus string
 
 const (
-	NEW         IssueStatus = "new"
-	RESOLVED    IssueStatus = "resolved"
-	IN_PROGRESS IssueStatus = "in_progress"
-	REOPENED    IssueStatus = "reopened"
-	BLOCKED     IssueStatus = "blocked"
-	ON_HOLD     IssueStatus = "on_hold"
+	NEW           IssueStatus = "new"
+	RESOLVED      IssueStatus = "resolved"
+	IN_PROGRESS   IssueStatus = "in_progress"
+	REOPENED      IssueStatus = "reopened"
+	BLOCKED       IssueStatus = "blocked"
+	ON_HOLD       IssueStatus = "on_hold"
+	// ISSUE_DELETED is used for soft-deletes: the row is retained but marked as deleted.
+	ISSUE_DELETED IssueStatus = "deleted"
 )
 
 type Severity string
