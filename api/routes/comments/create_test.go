@@ -36,14 +36,33 @@ func TestCreateCommentHandler_Success(t *testing.T) {
 	}
 
 	// Create Issue - BeforeCreate will generate ID automatically
+	// Create users for assignee and reporter
+	assignee := models.User{
+		Username: "test-assignee",
+		Email:    "assignee@test.com",
+		Password: "password",
+		Role:     models.Editor,
+		IsActive: true,
+	}
+	db.Create(&assignee)
+
+	reporter := models.User{
+		Username: "test-reporter",
+		Email:    "reporter@test.com",
+		Password: "password",
+		Role:     models.Editor,
+		IsActive: true,
+	}
+	db.Create(&reporter)
+
 	issue := models.Issue{
 		Title:       "Test Issue",
 		Description: "Test Description",
 		Type:        models.BUG,
 		Status:      models.NEW,
-		Assignee:    "test-assignee",
-		Reporter:    "test-reporter",
-		ComponentID: component.ID, // Use the actual component ID
+		AssigneeId:  &assignee.ID,
+		ReporterId:  reporter.ID,
+		ComponentID: component.ID,
 		Priority:    models.LOW_PRIORITY,
 		Severity:    models.LOW_SEVERITY,
 	}
@@ -223,15 +242,34 @@ func TestCreateCommentHandler_EmptyContent(t *testing.T) {
 		t.Fatalf("Failed to create component: %v", result.Error)
 	}
 
+	// Create users for assignee and reporter
+	assignee := models.User{
+		Username: "test-assignee",
+		Email:    "assignee@test.com",
+		Password: "password",
+		Role:     models.Editor,
+		IsActive: true,
+	}
+	db.Create(&assignee)
+
+	reporter := models.User{
+		Username: "test-reporter",
+		Email:    "reporter@test.com",
+		Password: "password",
+		Role:     models.Editor,
+		IsActive: true,
+	}
+	db.Create(&reporter)
+
 	// Create Issue - BeforeCreate will generate ID automatically
 	issue := models.Issue{
 		Title:       "Test Issue",
 		Description: "Test Description",
 		Type:        models.BUG,
 		Status:      models.NEW,
-		Assignee:    "test-assignee",
-		Reporter:    "test-reporter",
-		ComponentID: component.ID, // Use the actual component ID
+		AssigneeId:  &assignee.ID,
+		ReporterId:  reporter.ID,
+		ComponentID: component.ID,
 		Priority:    models.LOW_PRIORITY,
 		Severity:    models.LOW_SEVERITY,
 	}
