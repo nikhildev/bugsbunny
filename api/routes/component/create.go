@@ -2,7 +2,6 @@ package component
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 
@@ -13,31 +12,30 @@ import (
 func CreateComponentHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(500)
+		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Error reading request body"))
 		return
 	}
 
 	var component models.Component
-	err = json.Unmarshal(body, &component)
-
-	fmt.Println("component", component)
-
-	if err != nil {
-		w.WriteHeader(500)
-		fmt.Println("Error unmarshalling request body", err)
+	if err = json.Unmarshal(body, &component); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Error unmarshalling request body"))
 		return
 	}
 
 	db, err := clients.GetDbClient()
-
-	result := db.Create(&component)
-	if result.Error != nil {
-		w.WriteHeader(500)
-		fmt.Println("Error creating component", result.Error)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	w.WriteHeader(200)
+	result := db.Create(&component)
+	if result.Error != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(component)
 }
