@@ -2,8 +2,8 @@ package component
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 
 	"github.com/nikhildev/bugsbunny/api/clients"
@@ -14,59 +14,49 @@ import (
 func UpdateComponentHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	if id == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Missing component id"))
+		common.WriteError(w, http.StatusBadRequest, "missing component id")
 		return
 	}
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println("Error reading request body", err)
+		slog.Error("Error reading request body", "error", err)
+		common.WriteError(w, http.StatusInternalServerError, "error reading request body")
 		return
 	}
 
-	// Parse request body into a map to detect which fields were provided
 	var requestData map[string]any
-	err = json.Unmarshal(body, &requestData)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println("Error unmarshalling request body", err)
+	if err = json.Unmarshal(body, &requestData); err != nil {
+		slog.Error("Error unmarshalling request body", "error", err)
+		common.WriteError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
-	// Build updates map with only the fields present in the request
 	updates := common.ExtractUpdates(requestData, models.Component{})
-
-	// Return error if no fields to update
 	if len(updates) == 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("No fields to update"))
+		common.WriteError(w, http.StatusBadRequest, "no fields to update")
 		return
 	}
 
 	db, err := clients.GetDbClient()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println("Error getting db client", err)
+		slog.Error("Error getting db client", "error", err)
+		common.WriteError(w, http.StatusInternalServerError, "internal server error")
 		return
 	}
 
 	result := db.Model(&models.Component{}).Where("id = ?", id).Updates(updates)
 	if result.RowsAffected == 0 {
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("Component not found"))
+		common.WriteError(w, http.StatusNotFound, "component not found")
 		return
 	}
 
-	// Fetch the updated component to return it
 	var updatedComponent models.Component
-	if err := db.Where("id = ?", id).First(&updatedComponent).Error; err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println("Error fetching updated component", err)
+	if err = db.Where("id = ?", id).First(&updatedComponent).Error; err != nil {
+		slog.Error("Error fetching updated component", "id", id, "error", err)
+		common.WriteError(w, http.StatusInternalServerError, "error fetching updated component")
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(updatedComponent)
+	common.WriteJSON(w, http.StatusOK, updatedComponent)
 }

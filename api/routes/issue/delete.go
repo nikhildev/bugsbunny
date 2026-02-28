@@ -1,35 +1,34 @@
 package issue
 
 import (
-	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/nikhildev/bugsbunny/api/clients"
+	"github.com/nikhildev/bugsbunny/api/common"
 	"github.com/nikhildev/bugsbunny/api/models"
 )
 
 func DeleteIssueByIDHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	if id == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Missing issue id"))
+		common.WriteError(w, http.StatusBadRequest, "missing issue id")
 		return
 	}
 
 	db, err := clients.GetDbClient()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println("Error getting db client", err)
+		slog.Error("Error getting db client", "error", err)
+		common.WriteError(w, http.StatusInternalServerError, "internal server error")
 		return
 	}
 
 	result := db.Model(&models.Issue{}).Where("id = ?", id).Update("status", models.DELETED)
 	if result.Error != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println("Error deleting issue", result.Error)
+		slog.Error("Error deleting issue", "id", id, "error", result.Error)
+		common.WriteError(w, http.StatusInternalServerError, "error deleting issue")
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Issue deleted successfully"))
+	w.WriteHeader(http.StatusNoContent)
 }

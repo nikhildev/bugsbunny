@@ -98,15 +98,12 @@ func TestCreateCommentHandler_Success(t *testing.T) {
 	assert.Equal(t, http.StatusCreated, w.Code, "Expected status code 201")
 
 	// Verify comment was created in database
-	// Note: Due to a bug in the handler, Author is set before json.Unmarshal,
-	// which overwrites it with zero UUID. This test documents current behavior.
 	var createdComment models.Comment
 	queryResult := db.Where("issue_id = ?", issueID).First(&createdComment)
 	assert.NoError(t, queryResult.Error, "Comment should be created in database")
 	assert.Equal(t, "This is a test comment", createdComment.Content)
 	assert.Equal(t, issueID, createdComment.IssueID)
-	// BUG: Author should be authorUUID but is zero UUID due to json.Unmarshal overwriting it
-	assert.Equal(t, uuid.UUID{}, createdComment.Author, "Bug: Author is overwritten by json.Unmarshal")
+	assert.Equal(t, authorUUID, createdComment.Author, "Author should match the X-User-UUID header")
 	assert.Equal(t, 2, len(createdComment.Attachments))
 }
 
@@ -160,7 +157,7 @@ func TestCreateCommentHandler_InvalidJSON(t *testing.T) {
 	CreateCommentHandler(w, req)
 
 	// Assertions
-	assert.Equal(t, http.StatusInternalServerError, w.Code, "Expected status code 500 for invalid JSON")
+	assert.Equal(t, http.StatusBadRequest, w.Code, "Expected status code 400 for invalid JSON")
 }
 
 func TestCreateCommentHandler_InvalidUserUUID(t *testing.T) {
@@ -190,7 +187,7 @@ func TestCreateCommentHandler_InvalidUserUUID(t *testing.T) {
 	CreateCommentHandler(w, req)
 
 	// Assertions
-	assert.Equal(t, http.StatusInternalServerError, w.Code, "Expected status code 500 for invalid UUID")
+	assert.Equal(t, http.StatusBadRequest, w.Code, "Expected status code 400 for invalid UUID")
 }
 
 func TestCreateCommentHandler_MissingUserUUID(t *testing.T) {
@@ -219,7 +216,7 @@ func TestCreateCommentHandler_MissingUserUUID(t *testing.T) {
 	CreateCommentHandler(w, req)
 
 	// Assertions
-	assert.Equal(t, http.StatusInternalServerError, w.Code, "Expected status code 500 for missing UUID header")
+	assert.Equal(t, http.StatusBadRequest, w.Code, "Expected status code 400 for missing UUID header")
 }
 
 func TestCreateCommentHandler_EmptyContent(t *testing.T) {

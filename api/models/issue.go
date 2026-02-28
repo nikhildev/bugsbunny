@@ -26,13 +26,13 @@ type Issue struct {
 }
 
 func (i *Issue) BeforeCreate(tx *gorm.DB) (err error) {
-	uuid, err := uuid.NewV7()
-
-	if err != nil {
-		return err
+	if i.ID == "" {
+		uuid, err := uuid.NewV7()
+		if err != nil {
+			return err
+		}
+		i.ID = uuid.String()
 	}
-
-	i.ID = uuid.String()
 	return nil
 }
 
