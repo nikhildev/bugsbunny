@@ -20,7 +20,8 @@ var serverCmd = &cobra.Command{
 			return err
 		}
 
-		if _, err := clients.InitDB(cfg.DB); err != nil {
+		db, err := clients.InitDB(cfg.DB)
+		if err != nil {
 			return err
 		}
 
@@ -31,7 +32,7 @@ var serverCmd = &cobra.Command{
 
 		addr := cfg.Server.Host + ":" + cfg.Server.Port
 		slog.Info("Starting server", "addr", addr)
-		mux := routes.SetupRoutes()
+		mux := routes.SetupRoutes(db)
 		handler := common.Chain(mux, common.RecoveryMiddleware, common.LoggingMiddleware, common.CORSMiddleware)
 		return http.ListenAndServe(addr, handler)
 	},

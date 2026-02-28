@@ -7,12 +7,11 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/nikhildev/bugsbunny/api/clients"
 	"github.com/nikhildev/bugsbunny/api/common"
 	"github.com/nikhildev/bugsbunny/api/models"
 )
 
-func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) CreateComment(w http.ResponseWriter, r *http.Request) {
 	issueId := r.PathValue("id")
 	if issueId == "" {
 		common.WriteError(w, http.StatusBadRequest, "missing issue id")
@@ -43,14 +42,7 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 	comment.IssueID = issueId
 	comment.Author = authorID
 
-	db, err := clients.GetDbClient()
-	if err != nil {
-		slog.Error("Error getting db client", "error", err)
-		common.WriteError(w, http.StatusInternalServerError, "internal server error")
-		return
-	}
-
-	result := db.Create(&comment)
+	result := h.DB.Create(&comment)
 	if result.Error != nil {
 		slog.Error("Error creating comment", "error", result.Error)
 		common.WriteError(w, http.StatusInternalServerError, "error creating comment")
