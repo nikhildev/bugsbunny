@@ -6,12 +6,11 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/nikhildev/bugsbunny/api/clients"
 	"github.com/nikhildev/bugsbunny/api/common"
 	"github.com/nikhildev/bugsbunny/api/models"
 )
 
-func UpdateIssueHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) UpdateIssue(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	if id == "" {
 		common.WriteError(w, http.StatusBadRequest, "missing issue id")
@@ -38,14 +37,7 @@ func UpdateIssueHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, err := clients.GetDbClient()
-	if err != nil {
-		slog.Error("Error getting db client", "error", err)
-		common.WriteError(w, http.StatusInternalServerError, "internal server error")
-		return
-	}
-
-	result := db.Model(&models.Issue{}).Where("id = ?", id).Updates(updates)
+	result := h.DB.Model(&models.Issue{}).Where("id = ?", id).Updates(updates)
 	if result.Error != nil {
 		slog.Error("Error updating issue", "id", id, "error", result.Error)
 		common.WriteError(w, http.StatusInternalServerError, "error updating issue")
@@ -57,7 +49,7 @@ func UpdateIssueHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var updatedIssue models.Issue
-	if err = db.Where("id = ?", id).First(&updatedIssue).Error; err != nil {
+	if err = h.DB.Where("id = ?", id).First(&updatedIssue).Error; err != nil {
 		slog.Error("Error fetching updated issue", "id", id, "error", err)
 		common.WriteError(w, http.StatusInternalServerError, "error fetching updated issue")
 		return

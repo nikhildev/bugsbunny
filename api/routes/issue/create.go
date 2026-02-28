@@ -6,12 +6,11 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/nikhildev/bugsbunny/api/clients"
 	"github.com/nikhildev/bugsbunny/api/common"
 	"github.com/nikhildev/bugsbunny/api/models"
 )
 
-func CreateIssueHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) CreateIssue(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		slog.Error("Error reading request body", "error", err)
@@ -31,14 +30,7 @@ func CreateIssueHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, err := clients.GetDbClient()
-	if err != nil {
-		slog.Error("Error getting db client", "error", err)
-		common.WriteError(w, http.StatusInternalServerError, "internal server error")
-		return
-	}
-
-	result := db.Create(&issue)
+	result := h.DB.Create(&issue)
 	if result.Error != nil {
 		slog.Error("Error creating issue", "error", result.Error)
 		common.WriteError(w, http.StatusInternalServerError, "error creating issue")

@@ -6,12 +6,11 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/nikhildev/bugsbunny/api/clients"
 	"github.com/nikhildev/bugsbunny/api/common"
 	"github.com/nikhildev/bugsbunny/api/models"
 )
 
-func CreateComponentHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) CreateComponent(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		slog.Error("Error reading request body", "error", err)
@@ -31,14 +30,7 @@ func CreateComponentHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, err := clients.GetDbClient()
-	if err != nil {
-		slog.Error("Error getting db client", "error", err)
-		common.WriteError(w, http.StatusInternalServerError, "internal server error")
-		return
-	}
-
-	result := db.Create(&component)
+	result := h.DB.Create(&component)
 	if result.Error != nil {
 		slog.Error("Error creating component", "error", result.Error)
 		common.WriteError(w, http.StatusInternalServerError, "error creating component")
