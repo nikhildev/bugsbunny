@@ -12,12 +12,21 @@ Follow these conventions unless the user explicitly asks for something different
 ### Project layout (important directories)
 
 - **`api/`**: Main Go module.
-  - **`commands/`**: Cobra commands (`run server`, `migrate`, etc.).
-  - **`routes/`**: HTTP handlers (`issue`, `component`, `comments`, `health`, etc.).
-  - **`models/`**: Domain models (`issue`, `component`, `user`, `comment`, `change`, etc.).
-  - **`clients/`**: External clients (`database`, `openai`).
-  - **`common/`**: Shared helpers, including `test_utils` for Go tests.
   - **`main.go`**: CLI entry point.
+  - **`internal/`**: All private packages (Go `internal` convention).
+    - **`cli/`**: Cobra commands (`run server`, `migrate`, etc.).
+    - **`config/`**: Application configuration (`AppConfig`, `DbConfig`, `ServerConfig`, `OpenAIConfig`, `LoadConfig()`).
+    - **`database/`**: Database initialization and client management (`InitDB()`, `GetDbClient()`, `CloseDbClient()`).
+    - **`aiclient/`**: OpenAI client wrapper (`InitOpenAI()`, `GetOpenAIClient()`).
+    - **`model/`**: Domain models (`Issue`, `Component`, `User`, `Comment`, `Change`, etc.).
+    - **`handler/`**: HTTP route handlers and router setup.
+      - **`issue/`**: Issue CRUD handlers.
+      - **`component/`**: Component CRUD handlers.
+      - **`comment/`**: Comment handlers.
+    - **`middleware/`**: HTTP middleware (CORS, logging, recovery, chain).
+    - **`response/`**: JSON response helpers (`WriteJSON`, `WriteError`, `JSONSuccess`, `JSONError`).
+    - **`updates/`**: Generic struct-to-map update extraction (`ExtractUpdates`).
+    - **`testutil/`**: Shared test utilities (testcontainer setup, etc.).
 - **`frontend/`**: Bun + React app.
   - Uses `bun` scripts from `frontend/package.json` (`dev`, `start`, `build`).
 
@@ -84,20 +93,24 @@ Follow these conventions unless the user explicitly asks for something different
   - In Go, prefer the existing UUID library (`github.com/google/uuid`) and extend it with UUID7 helpers or use a compatible UUID7 helper. Do **not** introduce incompatible formats.
 
 - **Go code organization**
-  - **Preserve existing layering**:
-    - New CLI behavior → `api/commands/`.
-    - New API endpoints → `api/routes/<domain>/`.
-    - New domain entities → `api/models/`.
-    - New external services (e.g. new API clients) → `api/clients/`.
-    - Shared logic that isn’t domain‑specific → `api/common/`.
+  - **Preserve existing layering** (all under `api/internal/`):
+    - New CLI behavior → `api/internal/cli/`.
+    - New API endpoints → `api/internal/handler/<domain>/`.
+    - New domain entities → `api/internal/model/`.
+    - New external services (e.g. new API clients) → `api/internal/aiclient/` or a new `internal/` sub-package.
+    - Configuration → `api/internal/config/`.
+    - Database management → `api/internal/database/`.
+    - HTTP middleware → `api/internal/middleware/`.
+    - JSON response helpers → `api/internal/response/`.
+    - Shared logic that isn’t domain‑specific → appropriate `internal/` sub-package.
   - Prefer standard library + existing dependencies; avoid adding new frameworks unless necessary and justified.
 
 - **Go test utilities**
   - **Existing rule (preserve)**:  
     - **Whenever generating Go test files, keep common code modular and in a `test_utils` location so it can be reused.**
   - Practically:
-    - Put shared helpers in `api/common/test_utils.go` or a dedicated `test_utils` package.
-    - Tests should import from `test_utils` instead of duplicating setup/teardown logic.
+    - Put shared helpers in `api/internal/testutil/testutil.go`.
+    - Tests should import from `testutil` instead of duplicating setup/teardown logic.
 
 - **Frontend (React + Bun)**
   - Always:
@@ -116,8 +129,8 @@ Follow these conventions unless the user explicitly asks for something different
     - Use **testcontainers-go** (already in `api/go.mod`) for integration tests.
     - Ensure Docker is running; these tests may be slower and should be clearly named to reflect integration behavior.
   - New tests:
-    - Place unit tests alongside their packages (e.g. `routes/issue/create_test.go`).
-    - Move repeated setup/fixtures into `api/common/test_utils.go` (or similar) rather than duplicating across files.
+    - Place unit tests alongside their packages (e.g. `internal/handler/issue/create_test.go`).
+    - Move repeated setup/fixtures into `api/internal/testutil/testutil.go` rather than duplicating across files.
 
 - **Frontend tests**
   - Prefer Bun’s native test runner for any JavaScript/TypeScript tests:
