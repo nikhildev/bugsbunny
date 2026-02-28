@@ -12,5 +12,6 @@ func RegisterIssueRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /issues", GetIssuesHandler)
 	mux.HandleFunc("PUT /issues/{id}", UpdateIssueHandler)
 	mux.HandleFunc("DELETE /issues/{id}", DeleteIssueByIDHandler)
-	mux.HandleFunc("POST /issues/{id}/comments", comments.CreateCommentHandler)
+	ch := &comments.Handler{}
+	mux.HandleFunc("POST /issues/{id}/comments", ch.CreateComment)
 }
