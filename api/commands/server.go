@@ -34,7 +34,10 @@ var serverCmd = &cobra.Command{
 			Port: v.GetString("HTTP_SERVER_PORT"),
 		}
 
-		cfg := clients.GetDbConfig()
+		cfg, err := clients.GetDbConfig()
+		if err != nil {
+			return err
+		}
 		if _, err := clients.InitDB(cfg); err != nil {
 			return err
 		}

@@ -30,6 +30,5 @@ func DeleteComponentHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Component deleted successfully"))
+	w.WriteHeader(http.StatusNoContent)
 }

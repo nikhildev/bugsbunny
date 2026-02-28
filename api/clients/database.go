@@ -10,10 +10,8 @@ import (
 	"gorm.io/gorm"
 )
 
-// DB holds the global database connection instance, set by InitDB.
 var DB *gorm.DB
 
-// DbConfig contains the parameters needed to connect to a PostgreSQL database.
 type DbConfig struct {
 	Host     string
 	Port     string
@@ -23,17 +21,14 @@ type DbConfig struct {
 	SSLMode  string
 }
 
-// GetDbConfig reads database connection settings from environment variables
-// prefixed with "DB_" using Viper and returns a populated DbConfig.
-func GetDbConfig() DbConfig {
+func GetDbConfig() (DbConfig, error) {
 	v := viper.New()
 	v.AutomaticEnv()
 	v.SetEnvPrefix("DB")
 	v.SetConfigFile(".env")
 	v.SetConfigType("env")
 	if err := v.ReadInConfig(); err != nil {
-		slog.Error("failed to read database config", "error", err)
-		return DbConfig{}
+		return DbConfig{}, fmt.Errorf("failed to read database config: %w", err)
 	}
 	return DbConfig{
 		Host:     v.GetString("DB_HOST"),
@@ -42,20 +37,15 @@ func GetDbConfig() DbConfig {
 		Password: v.GetString("DB_PASSWORD"),
 		Name:     v.GetString("DB_NAME"),
 		SSLMode:  v.GetString("DB_SSL_MODE"),
-	}
+	}, nil
 }
 
-// InitDB opens a PostgreSQL connection using the provided DbConfig.
 func InitDB(dbConfig DbConfig) (*gorm.DB, error) {
 	slog.Info("initializing database...")
 	dsn := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		dbConfig.Host,
-		dbConfig.Port,
-		dbConfig.User,
-		dbConfig.Password,
-		dbConfig.Name,
-		dbConfig.SSLMode,
+		dbConfig.Host, dbConfig.Port, dbConfig.User,
+		dbConfig.Password, dbConfig.Name, dbConfig.SSLMode,
 	)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
@@ -65,7 +55,6 @@ func InitDB(dbConfig DbConfig) (*gorm.DB, error) {
 	return db, nil
 }
 
-// GetDbClient returns the shared *gorm.DB instance initialized by InitDB.
 func GetDbClient() (*gorm.DB, error) {
 	if DB == nil {
 		return nil, errors.New("database not initialized: call InitDB first")
@@ -73,7 +62,6 @@ func GetDbClient() (*gorm.DB, error) {
 	return DB, nil
 }
 
-// CloseDbClient gracefully closes the underlying sql.DB connection.
 func CloseDbClient() {
 	db, err := DB.DB()
 	if err != nil {

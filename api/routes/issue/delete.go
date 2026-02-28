@@ -30,5 +30,5 @@ func DeleteIssueByIDHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	common.WriteJSON(w, http.StatusOK, map[string]string{"message": "issue deleted successfully"})
+	w.WriteHeader(http.StatusNoContent)
 }

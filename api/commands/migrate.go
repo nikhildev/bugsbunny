@@ -20,7 +20,10 @@ var migrateCmd = &cobra.Command{
 	Short: "Run database migrations",
 	Long:  `Apply database migrations to the BugsBunny database.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		cfg := clients.GetDbConfig()
+		cfg, err := clients.GetDbConfig()
+		if err != nil {
+			return fmt.Errorf("load database config: %w", err)
+		}
 		db, err := clients.InitDB(cfg)
 		if err != nil {
 			return fmt.Errorf("init database: %w", err)
@@ -46,7 +49,6 @@ var migrateCmd = &cobra.Command{
 		if err := createDefaultUsers(db); err != nil {
 			return fmt.Errorf("create default users: %w", err)
 		}
-		slog.Info("Default users created successfully")
 
 		slog.Info("Migrations applied successfully")
 
@@ -55,45 +57,29 @@ var migrateCmd = &cobra.Command{
 				return fmt.Errorf("seed users: %w", err)
 			}
 			slog.Info("Sample users inserted successfully")
-
 			if err := seedComponents(db); err != nil {
 				return fmt.Errorf("seed components: %w", err)
 			}
 			slog.Info("Sample components inserted successfully")
-
 			if err := seedIssues(db); err != nil {
 				return fmt.Errorf("seed issues: %w", err)
 			}
 			slog.Info("Sample issues inserted successfully")
 		}
-
 		return nil
 	},
 }
 
 func init() {
-	migrateCmd.Flags().BoolVar(&autopopulate, "autopopulate", false, "Insert sample data into the users table after migration")
+	migrateCmd.Flags().BoolVar(&autopopulate, "autopopulate", false, "Insert sample data after migration")
 	migrateCmd.Flags().BoolVar(&resetDb, "resetdb", false, "Reset the database before running migrations")
 }
 
 func createDefaultUsers(db *gorm.DB) error {
 	users := []*models.User{
-		{
-			Username: "admin",
-			Email:    "admin@bugsbunny.dev",
-			Password: "admin123",
-			Role:     models.Admin,
-			IsActive: true,
-		},
-		{
-			Username: "bot",
-			Email:    "bot@bugsbunny.dev",
-			Password: "bot123",
-			Role:     models.Editor,
-			IsActive: true,
-		},
+		{Username: "admin", Email: "admin@bugsbunny.dev", Password: "admin123", Role: models.Admin, IsActive: true},
+		{Username: "bot", Email: "bot@bugsbunny.dev", Password: "bot123", Role: models.Editor, IsActive: true},
 	}
-
 	result := db.Create(users)
 	if result.Error != nil {
 		slog.Error("Failed to create default users", "error", result.Error)
@@ -105,29 +91,9 @@ func createDefaultUsers(db *gorm.DB) error {
 
 func seedUsers(db *gorm.DB) error {
 	users := []models.User{
-
-		{
-			BaseModel: models.BaseModel{
-				ID: "019c48e9-ab2e-7c50-9e03-23f8af4fdd2c",
-			},
-			Username: "janedoe",
-			Email:    "jane.doe@bugsbunny.dev",
-			Password: "jane123",
-			Role:     models.Editor,
-			IsActive: true,
-		},
-		{
-			BaseModel: models.BaseModel{
-				ID: "019c48e9-ab2e-7c50-9e03-23f8af4fdd2d",
-			},
-			Username: "johndoe",
-			Email:    "john.doe@bugsbunny.dev",
-			Password: "john123",
-			Role:     models.Viewer,
-			IsActive: true,
-		},
+		{BaseModel: models.BaseModel{ID: "019c48e9-ab2e-7c50-9e03-23f8af4fdd2c"}, Username: "janedoe", Email: "jane.doe@bugsbunny.dev", Password: "jane123", Role: models.Editor, IsActive: true},
+		{BaseModel: models.BaseModel{ID: "019c48e9-ab2e-7c50-9e03-23f8af4fdd2d"}, Username: "johndoe", Email: "john.doe@bugsbunny.dev", Password: "john123", Role: models.Viewer, IsActive: true},
 	}
-
 	for i := range users {
 		result := db.Where("id = ?", users[i].ID).FirstOrCreate(&users[i])
 		if result.Error != nil {
@@ -141,21 +107,8 @@ func seedUsers(db *gorm.DB) error {
 
 func seedComponents(db *gorm.DB) error {
 	components := []models.Component{
-		{
-			BaseModel: models.BaseModel{
-				ID: "019c48e9-ab2e-7c50-9e03-23f8af4fdd2e",
-			},
-			Name:            "General",
-			Description:     "All general issues",
-			Owner:           "admin",
-			Status:          models.ACTIVE,
-			SlackChannelID:  nil, // Fixed: do not use a non-existent channel, set to nil
-			IsBotEnabled:    false,
-			BotKnowledge:    []string{},
-			BotInstructions: []string{},
-		},
+		{BaseModel: models.BaseModel{ID: "019c48e9-ab2e-7c50-9e03-23f8af4fdd2e"}, Name: "General", Description: "All general issues", Owner: "admin", Status: models.ACTIVE, IsBotEnabled: false, BotKnowledge: []string{}, BotInstructions: []string{}},
 	}
-
 	for i := range components {
 		result := db.Where("id = ?", components[i].ID).FirstOrCreate(&components[i])
 		if result.Error != nil {
@@ -175,7 +128,6 @@ func seedIssues(db *gorm.DB) error {
 		ComponentID: uuid.MustParse("019c48e9-ab2e-7c50-9e03-23f8af4fdd2e").String(),
 		Type:        models.SUPPORT,
 	}
-
 	result := db.Create(&issue)
 	if result.Error != nil {
 		slog.Error("Failed to insert issue", "error", result.Error)
