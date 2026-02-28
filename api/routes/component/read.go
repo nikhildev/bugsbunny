@@ -1,7 +1,7 @@
 package component
 
 import (
-	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/nikhildev/bugsbunny/api/clients"
@@ -19,7 +19,7 @@ func GetComponentByIDHandler(w http.ResponseWriter, r *http.Request) {
 	db, err := clients.GetDbClient()
 	if err != nil {
 		common.JSONError(w, "internal server error", http.StatusInternalServerError)
-		fmt.Println("Error getting db client", err)
+		slog.Error("Error getting db client", "error", err)
 		return
 	}
 
@@ -27,7 +27,7 @@ func GetComponentByIDHandler(w http.ResponseWriter, r *http.Request) {
 	result := db.First(&component, "id = ?", id)
 	if result.Error != nil {
 		common.JSONError(w, "Component not found", http.StatusNotFound)
-		fmt.Println("Component not found", result.Error)
+		slog.Error("Component not found", "error", result.Error)
 		return
 	}
 
@@ -38,7 +38,7 @@ func GetComponentsHandler(w http.ResponseWriter, r *http.Request) {
 	db, err := clients.GetDbClient()
 	if err != nil {
 		common.JSONError(w, "internal server error", http.StatusInternalServerError)
-		fmt.Println("Error getting db client", err)
+		slog.Error("Error getting db client", "error", err)
 		return
 	}
 
@@ -46,7 +46,7 @@ func GetComponentsHandler(w http.ResponseWriter, r *http.Request) {
 	result := db.Find(&components)
 	if result.Error != nil {
 		common.JSONError(w, "internal server error", http.StatusInternalServerError)
-		fmt.Println("Error getting components", result.Error)
+		slog.Error("Error getting components", "error", result.Error)
 		return
 	}
 

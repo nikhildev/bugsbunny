@@ -1,7 +1,7 @@
 package component
 
 import (
-	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/nikhildev/bugsbunny/api/clients"
@@ -19,14 +19,14 @@ func DeleteComponentHandler(w http.ResponseWriter, r *http.Request) {
 	db, err := clients.GetDbClient()
 	if err != nil {
 		common.JSONError(w, "internal server error", http.StatusInternalServerError)
-		fmt.Println("Error getting db client", err)
+		slog.Error("Error getting db client", "error", err)
 		return
 	}
 
 	result := db.Model(&models.Component{}).Where("id = ?", id).Update("status", models.DELETED)
 	if result.Error != nil {
 		common.JSONError(w, "internal server error", http.StatusInternalServerError)
-		fmt.Println("Error deleting component", result.Error)
+		slog.Error("Error deleting component", "error", result.Error)
 		return
 	}
 
