@@ -92,7 +92,8 @@ func TestCreateCommentHandler_Success(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	// Execute handler
-	CreateCommentHandler(w, req)
+	h := &Handler{DB: db}
+	h.CreateComment(w, req)
 
 	// Assertions
 	assert.Equal(t, http.StatusCreated, w.Code, "Expected status code 201")
@@ -112,6 +113,8 @@ func TestCreateCommentHandler_MissingIssueID(t *testing.T) {
 	_, cleanup := common.SetupTestDB(t)
 	defer cleanup()
 
+	db, _ := clients.GetDbClient()
+
 	// Prepare request body
 	authorUUID, _ := uuid.NewV7()
 	comment := models.Comment{
@@ -129,7 +132,8 @@ func TestCreateCommentHandler_MissingIssueID(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	// Execute handler
-	CreateCommentHandler(w, req)
+	h := &Handler{DB: db}
+	h.CreateComment(w, req)
 
 	// Assertions
 	assert.Equal(t, http.StatusBadRequest, w.Code, "Expected status code 400 for missing issue ID")
@@ -139,6 +143,8 @@ func TestCreateCommentHandler_InvalidJSON(t *testing.T) {
 	// Setup
 	_, cleanup := common.SetupTestDB(t)
 	defer cleanup()
+
+	db, _ := clients.GetDbClient()
 
 	issueID, _ := uuid.NewV7()
 	issueIDStr := issueID.String()
@@ -154,7 +160,8 @@ func TestCreateCommentHandler_InvalidJSON(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	// Execute handler
-	CreateCommentHandler(w, req)
+	h := &Handler{DB: db}
+	h.CreateComment(w, req)
 
 	// Assertions
 	assert.Equal(t, http.StatusBadRequest, w.Code, "Expected status code 400 for invalid JSON")
@@ -164,6 +171,8 @@ func TestCreateCommentHandler_InvalidUserUUID(t *testing.T) {
 	// Setup
 	_, cleanup := common.SetupTestDB(t)
 	defer cleanup()
+
+	db, _ := clients.GetDbClient()
 
 	issueID, _ := uuid.NewV7()
 	issueIDStr := issueID.String()
@@ -184,7 +193,8 @@ func TestCreateCommentHandler_InvalidUserUUID(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	// Execute handler
-	CreateCommentHandler(w, req)
+	h := &Handler{DB: db}
+	h.CreateComment(w, req)
 
 	// Assertions
 	assert.Equal(t, http.StatusBadRequest, w.Code, "Expected status code 400 for invalid UUID")
@@ -194,6 +204,8 @@ func TestCreateCommentHandler_MissingUserUUID(t *testing.T) {
 	// Setup
 	_, cleanup := common.SetupTestDB(t)
 	defer cleanup()
+
+	db, _ := clients.GetDbClient()
 
 	issueID, _ := uuid.NewV7()
 	issueIDStr := issueID.String()
@@ -213,7 +225,8 @@ func TestCreateCommentHandler_MissingUserUUID(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	// Execute handler
-	CreateCommentHandler(w, req)
+	h := &Handler{DB: db}
+	h.CreateComment(w, req)
 
 	// Assertions
 	assert.Equal(t, http.StatusBadRequest, w.Code, "Expected status code 400 for missing UUID header")
@@ -295,7 +308,8 @@ func TestCreateCommentHandler_EmptyContent(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	// Execute handler
-	CreateCommentHandler(w, req)
+	h := &Handler{DB: db}
+	h.CreateComment(w, req)
 
 	// Note: This test documents current behavior - the handler accepts empty content
 	// If validation is added later, this test should be updated

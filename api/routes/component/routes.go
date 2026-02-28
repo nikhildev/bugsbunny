@@ -1,11 +1,16 @@
 package component
 
-import "net/http"
+import (
+	"net/http"
 
-func RegisterComponentRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("GET /components", GetComponentsHandler)
-	mux.HandleFunc("POST /components", CreateComponentHandler)
-	mux.HandleFunc("GET /components/{id}", GetComponentByIDHandler)
-	mux.HandleFunc("DELETE /components/{id}", DeleteComponentHandler)
-	mux.HandleFunc("PATCH /components/{id}", UpdateComponentHandler)
+	"gorm.io/gorm"
+)
+
+func RegisterComponentRoutes(mux *http.ServeMux, db *gorm.DB) {
+	h := &Handler{DB: db}
+	mux.HandleFunc("GET /components", h.GetComponents)
+	mux.HandleFunc("POST /components", h.CreateComponent)
+	mux.HandleFunc("GET /components/{id}", h.GetComponentByID)
+	mux.HandleFunc("DELETE /components/{id}", h.DeleteComponent)
+	mux.HandleFunc("PATCH /components/{id}", h.UpdateComponent)
 }

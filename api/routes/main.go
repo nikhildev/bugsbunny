@@ -5,12 +5,13 @@ import (
 
 	"github.com/nikhildev/bugsbunny/api/routes/component"
 	"github.com/nikhildev/bugsbunny/api/routes/issue"
+	"gorm.io/gorm"
 )
 
-func SetupRoutes() *http.ServeMux {
+func SetupRoutes(db *gorm.DB) *http.ServeMux {
 	mux := http.NewServeMux()
 	RegisterHealthRoutes(mux)
-	component.RegisterComponentRoutes(mux)
-	issue.RegisterIssueRoutes(mux)
+	component.RegisterComponentRoutes(mux, db)
+	issue.RegisterIssueRoutes(mux, db)
 	return mux
 }
