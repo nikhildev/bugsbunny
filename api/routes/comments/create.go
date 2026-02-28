@@ -2,59 +2,58 @@ package comments
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/nikhildev/bugsbunny/api/clients"
+	"github.com/nikhildev/bugsbunny/api/common"
 	"github.com/nikhildev/bugsbunny/api/models"
 )
 
-func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) CreateComment(w http.ResponseWriter, r *http.Request) {
+	issueId := r.PathValue("id")
+	if issueId == "" {
+		common.WriteError(w, http.StatusBadRequest, "missing issue id")
+		return
+	}
+
+	authorID, err := uuid.Parse(r.Header.Get("X-User-UUID"))
+	if err != nil {
+		common.WriteError(w, http.StatusBadRequest, "X-User-UUID header is missing or invalid")
+		return
+	}
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println("Error reading request body", err)
+		slog.Error("Error reading request body", "error", err)
+		common.WriteError(w, http.StatusInternalServerError, "error reading request body")
 		return
 	}
 
 	var comment models.Comment
-	issueId := r.PathValue("id")
-	if issueId == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Println("Missing issue id")
+	if err = json.Unmarshal(body, &comment); err != nil {
+		slog.Error("Error unmarshalling request body", "error", err)
+		common.WriteError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
+	if comment.Content == "" {
+		common.WriteError(w, http.StatusBadRequest, "content is required")
+		return
+	}
+
+	// Set fields after unmarshal to prevent them being overwritten by the request body
 	comment.IssueID = issueId
-	comment.Author, err = uuid.Parse(r.Header.Get("X-User-UUID"))
+	comment.Author = authorID
 
-	err = json.Unmarshal(body, &comment)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println("Invalid request body", err)
-		return
-	}
-
-	comment.IssueID = issueId
-
-	db, err := clients.GetDbClient()
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println("Error getting db client", err)
-		return
-	}
-
-	result := db.Create(&comment)
+	result := h.DB.Create(&comment)
 	if result.Error != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println("Error creating comment", result.Error.Error())
+		slog.Error("Error creating comment", "error", result.Error)
+		common.WriteError(w, http.StatusInternalServerError, "error creating comment")
 		return
 	}
-	w.WriteHeader(http.StatusCreated)
-	fmt.Println("Comment created successfully", result.RowsAffected)
-	json.NewEncoder(w).Encode(result.RowsAffected)
 
+	slog.Info("Comment created", "issue_id", issueId, "rows_affected", result.RowsAffected)
+	common.WriteJSON(w, http.StatusCreated, comment)
 }
