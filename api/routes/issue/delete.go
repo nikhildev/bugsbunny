@@ -23,8 +23,8 @@ func DeleteIssueByIDHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Soft delete: set status to DELETED rather than removing the row
-	result := db.Model(&models.Issue{}).Where("id = ?", id).Update("status", models.DELETED)
+	// Soft delete: set status to ISSUE_DELETED rather than removing the row
+	result := db.Model(&models.Issue{}).Where("id = ?", id).Update("status", models.ISSUE_DELETED)
 	if result.Error != nil {
 		slog.Error("Error deleting issue", "id", id, "error", result.Error)
 		common.WriteError(w, http.StatusInternalServerError, "error deleting issue")
