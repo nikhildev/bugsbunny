@@ -53,8 +53,9 @@ const (
 	RESOLVED    IssueStatus = "resolved"
 	IN_PROGRESS IssueStatus = "in_progress"
 	REOPENED    IssueStatus = "reopened"
-	BLOCKED     IssueStatus = "blocked"
-	ON_HOLD     IssueStatus = "on_hold"
+	BLOCKED       IssueStatus = "blocked"
+	ON_HOLD       IssueStatus = "on_hold"
+	ISSUE_DELETED IssueStatus = "deleted"
 )
 
 type Severity string
