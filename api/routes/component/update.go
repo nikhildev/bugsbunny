@@ -6,12 +6,11 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/nikhildev/bugsbunny/api/clients"
 	"github.com/nikhildev/bugsbunny/api/common"
 	"github.com/nikhildev/bugsbunny/api/models"
 )
 
-func UpdateComponentHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) UpdateComponent(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	if id == "" {
 		common.WriteError(w, http.StatusBadRequest, "missing component id")
@@ -38,21 +37,14 @@ func UpdateComponentHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, err := clients.GetDbClient()
-	if err != nil {
-		slog.Error("Error getting db client", "error", err)
-		common.WriteError(w, http.StatusInternalServerError, "internal server error")
-		return
-	}
-
-	result := db.Model(&models.Component{}).Where("id = ?", id).Updates(updates)
+	result := h.DB.Model(&models.Component{}).Where("id = ?", id).Updates(updates)
 	if result.RowsAffected == 0 {
 		common.WriteError(w, http.StatusNotFound, "component not found")
 		return
 	}
 
 	var updatedComponent models.Component
-	if err = db.Where("id = ?", id).First(&updatedComponent).Error; err != nil {
+	if err = h.DB.Where("id = ?", id).First(&updatedComponent).Error; err != nil {
 		slog.Error("Error fetching updated component", "id", id, "error", err)
 		common.WriteError(w, http.StatusInternalServerError, "error fetching updated component")
 		return
