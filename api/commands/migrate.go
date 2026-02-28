@@ -20,11 +20,11 @@ var migrateCmd = &cobra.Command{
 	Short: "Run database migrations",
 	Long:  `Apply database migrations to the BugsBunny database.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		cfg, err := clients.GetDbConfig()
+		cfg, err := clients.LoadConfig()
 		if err != nil {
-			return fmt.Errorf("load database config: %w", err)
+			return fmt.Errorf("load config: %w", err)
 		}
-		db, err := clients.InitDB(cfg)
+		db, err := clients.InitDB(cfg.DB)
 		if err != nil {
 			return fmt.Errorf("init database: %w", err)
 		}
