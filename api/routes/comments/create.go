@@ -13,6 +13,13 @@ import (
 
 func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 
+	issueId := r.PathValue("id")
+	if issueId == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Println("Missing issue id")
+		return
+	}
+
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -21,24 +28,20 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var comment models.Comment
-	issueId := r.PathValue("id")
-	if issueId == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Println("Missing issue id")
-		return
-	}
-
-	comment.IssueID = issueId
-	comment.Author, err = uuid.Parse(r.Header.Get("X-User-UUID"))
-
 	err = json.Unmarshal(body, &comment)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		fmt.Println("Invalid request body", err)
 		return
 	}
 
 	comment.IssueID = issueId
+	comment.Author, err = uuid.Parse(r.Header.Get("X-User-UUID"))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Println("Invalid user UUID", err)
+		return
+	}
 
 	db, err := clients.GetDbClient()
 	if err != nil {

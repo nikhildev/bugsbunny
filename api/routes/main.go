@@ -10,6 +10,7 @@ import (
 
 func SetupRoutes() *http.ServeMux {
 	mux := http.NewServeMux()
+	RegisterHealthRoutes(mux)
 	component.RegisterComponentRoutes(mux)
 	issue.RegisterIssueRoutes(mux)
 	comments.RegisterCommentsRoutes(mux)
