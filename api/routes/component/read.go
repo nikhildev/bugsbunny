@@ -1,25 +1,24 @@
 package component
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/nikhildev/bugsbunny/api/clients"
+	"github.com/nikhildev/bugsbunny/api/common"
 	"github.com/nikhildev/bugsbunny/api/models"
 )
 
 func GetComponentByIDHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	if id == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Missing component id"))
+		common.JSONError(w, "Missing component id", http.StatusBadRequest)
 		return
 	}
 
 	db, err := clients.GetDbClient()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		common.JSONError(w, "internal server error", http.StatusInternalServerError)
 		fmt.Println("Error getting db client", err)
 		return
 	}
@@ -27,22 +26,18 @@ func GetComponentByIDHandler(w http.ResponseWriter, r *http.Request) {
 	var component models.Component
 	result := db.First(&component, "id = ?", id)
 	if result.Error != nil {
-		w.WriteHeader(http.StatusNotFound)
+		common.JSONError(w, "Component not found", http.StatusNotFound)
 		fmt.Println("Component not found", result.Error)
-		w.Write([]byte("Component not found"))
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(component); err != nil {
-		fmt.Println("Error encoding component", err)
-	}
+	common.JSONSuccess(w, http.StatusOK, component)
 }
 
 func GetComponentsHandler(w http.ResponseWriter, r *http.Request) {
 	db, err := clients.GetDbClient()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		common.JSONError(w, "internal server error", http.StatusInternalServerError)
 		fmt.Println("Error getting db client", err)
 		return
 	}
@@ -50,13 +45,10 @@ func GetComponentsHandler(w http.ResponseWriter, r *http.Request) {
 	var components []models.Component
 	result := db.Find(&components)
 	if result.Error != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		common.JSONError(w, "internal server error", http.StatusInternalServerError)
 		fmt.Println("Error getting components", result.Error)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(components); err != nil {
-		fmt.Println("Error encoding components", err)
-	}
+	common.JSONSuccess(w, http.StatusOK, components)
 }

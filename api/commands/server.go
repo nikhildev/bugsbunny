@@ -1,11 +1,11 @@
 package commands
 
 import (
-	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/nikhildev/bugsbunny/api/clients"
+	"github.com/nikhildev/bugsbunny/api/common"
 	"github.com/nikhildev/bugsbunny/api/routes"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -20,40 +20,34 @@ var serverCmd = &cobra.Command{
 	Use:   "server",
 	Short: "Run the API server",
 	Long:  `Start the BugsBunny API server.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		v := viper.New()
 		v.AutomaticEnv()
-
 		v.SetEnvPrefix("HTTP_SERVER")
 		v.SetConfigFile(".env")
 		v.SetConfigType("env")
-		err := v.ReadInConfig()
-
-		if err != nil {
-			log.Fatalf("Error reading config file: %v", err)
+		if err := v.ReadInConfig(); err != nil {
+			return err
 		}
 		serverConfig := serverConfig{
 			Host: v.GetString("HTTP_SERVER_HOST"),
 			Port: v.GetString("HTTP_SERVER_PORT"),
 		}
 
-		// Initialize database
-		_, err = clients.InitDB(clients.GetDbConfig())
-		if err != nil {
-			log.Fatalf("Error initializing database: %v", err)
+		cfg := clients.GetDbConfig()
+		if _, err := clients.InitDB(cfg); err != nil {
+			return err
 		}
 
 		defer func() {
-			fmt.Println("Closing database connection")
+			slog.Info("Closing database connection")
 			clients.CloseDbClient()
 		}()
-		// Use migrate command to migrate the database
 
-		fmt.Println("Starting server on", serverConfig.Host, ":", serverConfig.Port)
+		addr := serverConfig.Host + ":" + serverConfig.Port
+		slog.Info("Starting server", "addr", addr)
 		mux := routes.SetupRoutes()
-		err = http.ListenAndServe(serverConfig.Host+":"+serverConfig.Port, mux)
-		if err != nil {
-			log.Fatalf("Error starting server: %v", err)
-		}
+		handler := common.Chain(mux, common.RecoveryMiddleware, common.LoggingMiddleware, common.CORSMiddleware)
+		return http.ListenAndServe(addr, handler)
 	},
 }
