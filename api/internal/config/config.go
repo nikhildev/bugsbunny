@@ -8,9 +8,10 @@ import (
 
 // AppConfig holds all application configuration.
 type AppConfig struct {
-	DB     DbConfig
-	Server ServerConfig
-	OpenAI OpenAIConfig
+	DB       DbConfig
+	Server   ServerConfig
+	OpenAI   OpenAIConfig
+	Weaviate WeaviateConfig
 }
 
 // DbConfig contains database connection settings.
@@ -32,6 +33,12 @@ type ServerConfig struct {
 // OpenAIConfig contains OpenAI API settings.
 type OpenAIConfig struct {
 	APIKey string
+}
+
+// WeaviateConfig contains Weaviate vector store settings.
+type WeaviateConfig struct {
+	Host   string
+	Scheme string
 }
 
 // LoadConfig reads all configuration from environment variables and the .env
@@ -59,6 +66,10 @@ func LoadConfig() (AppConfig, error) {
 		},
 		OpenAI: OpenAIConfig{
 			APIKey: v.GetString("OPENAI_API_KEY"),
+		},
+		Weaviate: WeaviateConfig{
+			Host:   v.GetString("WEAVIATE_HOST"),
+			Scheme: v.GetString("WEAVIATE_SCHEME"),
 		},
 	}, nil
 }

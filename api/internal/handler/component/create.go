@@ -1,6 +1,7 @@
 package component
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"log/slog"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/nikhildev/bugsbunny/api/internal/model"
 	"github.com/nikhildev/bugsbunny/api/internal/response"
+	"github.com/nikhildev/bugsbunny/api/internal/vectorstore"
 )
 
 func (h *Handler) CreateComponent(w http.ResponseWriter, r *http.Request) {
@@ -35,6 +37,14 @@ func (h *Handler) CreateComponent(w http.ResponseWriter, r *http.Request) {
 		slog.Error("Error creating component", "error", result.Error)
 		response.WriteError(w, http.StatusInternalServerError, "error creating component")
 		return
+	}
+
+	if h.VectorSyncEnabled && len(component.BotKnowledge) > 0 {
+		go func() {
+			if err := vectorstore.SyncComponentKnowledge(context.Background(), component.ID, component.BotKnowledge); err != nil {
+				slog.Error("Error syncing component knowledge vectors", "id", component.ID, "error", err)
+			}
+		}()
 	}
 
 	response.WriteJSON(w, http.StatusCreated, component)

@@ -1,6 +1,7 @@
 package component
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"log/slog"
@@ -9,6 +10,7 @@ import (
 	"github.com/nikhildev/bugsbunny/api/internal/model"
 	"github.com/nikhildev/bugsbunny/api/internal/response"
 	"github.com/nikhildev/bugsbunny/api/internal/updates"
+	"github.com/nikhildev/bugsbunny/api/internal/vectorstore"
 )
 
 func (h *Handler) UpdateComponent(w http.ResponseWriter, r *http.Request) {
@@ -49,6 +51,14 @@ func (h *Handler) UpdateComponent(w http.ResponseWriter, r *http.Request) {
 		slog.Error("Error fetching updated component", "id", id, "error", err)
 		response.WriteError(w, http.StatusInternalServerError, "error fetching updated component")
 		return
+	}
+
+	if h.VectorSyncEnabled {
+		go func() {
+			if err := vectorstore.SyncComponentKnowledge(context.Background(), updatedComponent.ID, updatedComponent.BotKnowledge); err != nil {
+				slog.Error("Error syncing component knowledge vectors", "id", updatedComponent.ID, "error", err)
+			}
+		}()
 	}
 
 	response.WriteJSON(w, http.StatusOK, updatedComponent)

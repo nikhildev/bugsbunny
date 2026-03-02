@@ -3,5 +3,6 @@ package component
 import "gorm.io/gorm"
 
 type Handler struct {
-	DB *gorm.DB
+	DB                *gorm.DB
+	VectorSyncEnabled bool
 }
