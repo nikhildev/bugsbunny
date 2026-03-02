@@ -36,8 +36,8 @@ export const columns: TableColumn<Issue, any>[] = [
     accessorKey: "reporter",
   },
   {
-    header: "Component ID",
-    accessorKey: "component_id",
+    header: "Project ID",
+    accessorKey: "project_id",
   },
   {
     header: "Priority",

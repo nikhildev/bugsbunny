@@ -6,23 +6,23 @@ import (
 	"github.com/nikhildev/bugsbunny/api/internal/model"
 )
 
-func TestExtractUpdates_Component(t *testing.T) {
+func TestExtractUpdates_Project(t *testing.T) {
 	requestData := map[string]any{
-		"name":              "Updated Component",
+		"name":              "Updated Project",
 		"description":       "New description",
 		"owner":             "john@example.com",
 		"is_bot_enabled":    true,
 		"non_existent_field": "should be ignored",
 	}
 
-	updates := ExtractUpdates(requestData, model.Component{})
+	updates := ExtractUpdates(requestData, model.Project{})
 
 	if len(updates) != 4 {
 		t.Errorf("Expected 4 updates, got %d", len(updates))
 	}
 
-	if updates["name"] != "Updated Component" {
-		t.Errorf("Expected name to be 'Updated Component', got %v", updates["name"])
+	if updates["name"] != "Updated Project" {
+		t.Errorf("Expected name to be 'Updated Project', got %v", updates["name"])
 	}
 
 	if updates["description"] != "New description" {
@@ -74,7 +74,7 @@ func TestExtractUpdates_Issue(t *testing.T) {
 func TestExtractUpdates_EmptyRequestData(t *testing.T) {
 	requestData := map[string]any{}
 
-	updates := ExtractUpdates(requestData, model.Component{})
+	updates := ExtractUpdates(requestData, model.Project{})
 
 	if len(updates) != 0 {
 		t.Errorf("Expected 0 updates for empty request data, got %d", len(updates))
@@ -87,7 +87,7 @@ func TestExtractUpdates_OnlyNonMatchingFields(t *testing.T) {
 		"invalid_field_2": "value2",
 	}
 
-	updates := ExtractUpdates(requestData, model.Component{})
+	updates := ExtractUpdates(requestData, model.Project{})
 
 	if len(updates) != 0 {
 		t.Errorf("Expected 0 updates when no fields match, got %d", len(updates))

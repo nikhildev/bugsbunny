@@ -20,19 +20,19 @@ func TestCreateCommentHandler_Success(t *testing.T) {
 	_, cleanup := testutil.SetupTestDB(t)
 	defer cleanup()
 
-	// Create test data: Component and Issue (required for foreign keys)
+	// Create test data: Project and Issue (required for foreign keys)
 	db, _ := database.GetDbClient()
 
-	// Create Component first - BeforeCreate checks if ID is empty
-	component := model.Component{
-		Name:        "Test Component",
+	// Create Project first - BeforeCreate checks if ID is empty
+	project := model.Project{
+		Name:        "Test Project",
 		Description: "Test Description",
 		Owner:       "test-owner",
 		Status:      model.ACTIVE,
 	}
-	result := db.Create(&component)
+	result := db.Create(&project)
 	if result.Error != nil {
-		t.Fatalf("Failed to create component: %v", result.Error)
+		t.Fatalf("Failed to create project: %v", result.Error)
 	}
 
 	// Create Issue - BeforeCreate will generate ID automatically
@@ -62,7 +62,7 @@ func TestCreateCommentHandler_Success(t *testing.T) {
 		Status:      model.NEW,
 		AssigneeId:  &assignee.ID,
 		ReporterId:  reporter.ID,
-		ComponentID: component.ID,
+		ProjectID:   project.ID,
 		Priority:    model.LOW_PRIORITY,
 		Severity:    model.LOW_SEVERITY,
 	}
@@ -237,19 +237,19 @@ func TestCreateCommentHandler_EmptyContent(t *testing.T) {
 	_, cleanup := testutil.SetupTestDB(t)
 	defer cleanup()
 
-	// Create test data: Component and Issue (required for foreign keys)
+	// Create test data: Project and Issue (required for foreign keys)
 	db, _ := database.GetDbClient()
 
-	// Create Component first - BeforeCreate checks if ID is empty
-	component := model.Component{
-		Name:        "Test Component",
+	// Create Project first - BeforeCreate checks if ID is empty
+	project := model.Project{
+		Name:        "Test Project",
 		Description: "Test Description",
 		Owner:       "test-owner",
 		Status:      model.ACTIVE,
 	}
-	result := db.Create(&component)
+	result := db.Create(&project)
 	if result.Error != nil {
-		t.Fatalf("Failed to create component: %v", result.Error)
+		t.Fatalf("Failed to create project: %v", result.Error)
 	}
 
 	// Create users for assignee and reporter
@@ -279,7 +279,7 @@ func TestCreateCommentHandler_EmptyContent(t *testing.T) {
 		Status:      model.NEW,
 		AssigneeId:  &assignee.ID,
 		ReporterId:  reporter.ID,
-		ComponentID: component.ID,
+		ProjectID:   project.ID,
 		Priority:    model.LOW_PRIORITY,
 		Severity:    model.LOW_SEVERITY,
 	}

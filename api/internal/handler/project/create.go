@@ -1,0 +1,51 @@
+package project
+
+import (
+	"context"
+	"encoding/json"
+	"io"
+	"log/slog"
+	"net/http"
+
+	"github.com/nikhildev/bugsbunny/api/internal/model"
+	"github.com/nikhildev/bugsbunny/api/internal/response"
+	"github.com/nikhildev/bugsbunny/api/internal/vectorstore"
+)
+
+func (h *Handler) CreateProject(w http.ResponseWriter, r *http.Request) {
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		slog.Error("Error reading request body", "error", err)
+		response.WriteError(w, http.StatusInternalServerError, "error reading request body")
+		return
+	}
+
+	var project model.Project
+	if err = json.Unmarshal(body, &project); err != nil {
+		slog.Error("Error unmarshalling request body", "error", err)
+		response.WriteError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+
+	if project.Name == "" || project.Description == "" || project.Owner == "" {
+		response.WriteError(w, http.StatusBadRequest, "name, description, and owner are required")
+		return
+	}
+
+	result := h.DB.Create(&project)
+	if result.Error != nil {
+		slog.Error("Error creating project", "error", result.Error)
+		response.WriteError(w, http.StatusInternalServerError, "error creating project")
+		return
+	}
+
+	if h.VectorSyncEnabled && len(project.BotKnowledge) > 0 {
+		go func() {
+			if err := vectorstore.SyncProjectKnowledge(context.Background(), project.ID, project.BotKnowledge); err != nil {
+				slog.Error("Error syncing project knowledge vectors", "id", project.ID, "error", err)
+			}
+		}()
+	}
+
+	response.WriteJSON(w, http.StatusCreated, project)
+}

@@ -10,25 +10,25 @@ import (
 )
 
 type SearchResult struct {
-	ComponentID    string  `json:"component_id"`
+	ProjectID      string  `json:"project_id"`
 	KnowledgeIndex int     `json:"knowledge_index"`
 	Content        string  `json:"content"`
 	Distance       float64 `json:"distance"`
 }
 
-func SyncComponentKnowledge(ctx context.Context, componentID string, knowledge []string) error {
+func SyncProjectKnowledge(ctx context.Context, projectID string, knowledge []string) error {
 	client, err := GetWeaviateClient()
 	if err != nil {
 		return err
 	}
 
-	// Delete existing entries for this component
+	// Delete existing entries for this project
 	_, err = client.Batch().ObjectsBatchDeleter().
 		WithClassName(CollectionName).
 		WithWhere(filters.Where().
-			WithPath([]string{"componentId"}).
+			WithPath([]string{"projectId"}).
 			WithOperator(filters.Equal).
-			WithValueString(componentID)).
+			WithValueString(projectID)).
 		Do(ctx)
 	if err != nil {
 		return fmt.Errorf("delete existing knowledge: %w", err)
@@ -44,7 +44,7 @@ func SyncComponentKnowledge(ctx context.Context, componentID string, knowledge [
 		batcher.WithObjects(&models.Object{
 			Class: CollectionName,
 			Properties: map[string]any{
-				"componentId":    componentID,
+				"projectId":      projectID,
 				"knowledgeIndex": i,
 				"content":        entry,
 			},
@@ -63,14 +63,14 @@ func SyncComponentKnowledge(ctx context.Context, componentID string, knowledge [
 	return nil
 }
 
-func SearchKnowledge(ctx context.Context, query string, topK int, componentID string) ([]SearchResult, error) {
+func SearchKnowledge(ctx context.Context, query string, topK int, projectID string) ([]SearchResult, error) {
 	client, err := GetWeaviateClient()
 	if err != nil {
 		return nil, err
 	}
 
 	fields := []graphql.Field{
-		{Name: "componentId"},
+		{Name: "projectId"},
 		{Name: "knowledgeIndex"},
 		{Name: "content"},
 		{Name: "_additional", Fields: []graphql.Field{{Name: "distance"}}},
@@ -82,11 +82,11 @@ func SearchKnowledge(ctx context.Context, query string, topK int, componentID st
 		WithNearText(client.GraphQL().NearTextArgBuilder().WithConcepts([]string{query})).
 		WithLimit(topK)
 
-	if componentID != "" {
+	if projectID != "" {
 		builder = builder.WithWhere(filters.Where().
-			WithPath([]string{"componentId"}).
+			WithPath([]string{"projectId"}).
 			WithOperator(filters.Equal).
-			WithValueString(componentID))
+			WithValueString(projectID))
 	}
 
 	resp, err := builder.Do(ctx)
@@ -114,8 +114,8 @@ func SearchKnowledge(ctx context.Context, query string, topK int, componentID st
 			continue
 		}
 		r := SearchResult{
-			ComponentID: getString(m, "componentId"),
-			Content:     getString(m, "content"),
+			ProjectID: getString(m, "projectId"),
+			Content:   getString(m, "content"),
 		}
 		if idx, ok := m["knowledgeIndex"].(float64); ok {
 			r.KnowledgeIndex = int(idx)

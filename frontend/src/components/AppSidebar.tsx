@@ -47,9 +47,9 @@ export const AppSidebar = () => {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton>
-                  <Link to="/components" className="flex items-center gap-2">
+                  <Link to="/projects" className="flex items-center gap-2">
                     <ComponentIcon className="size-4" />
-                    Components
+                    Projects
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

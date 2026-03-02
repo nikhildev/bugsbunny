@@ -25,8 +25,8 @@ func (h *Handler) CreateIssue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if issue.Title == "" || issue.Description == "" || issue.ReporterId == "" || issue.ComponentID == "" {
-		response.WriteError(w, http.StatusBadRequest, "title, description, reporter_id, and component_id are required")
+	if issue.Title == "" || issue.Description == "" || issue.ReporterId == "" || issue.ProjectID == "" {
+		response.WriteError(w, http.StatusBadRequest, "title, description, reporter_id, and project_id are required")
 		return
 	}
 

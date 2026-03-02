@@ -7,7 +7,7 @@ export interface Issue {
   updated_at: string;
   type: IssueType;
   reporter: User;
-  component_id: string;
+  project_id: string;
   priority: Priority;
   severity: Severity;
 }

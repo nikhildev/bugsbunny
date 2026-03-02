@@ -15,7 +15,7 @@ func (h *Handler) SearchKnowledge(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	componentID := r.URL.Query().Get("component_id")
+	projectID := r.URL.Query().Get("project_id")
 
 	topK := 5
 	if tkStr := r.URL.Query().Get("top_k"); tkStr != "" {
@@ -30,7 +30,7 @@ func (h *Handler) SearchKnowledge(w http.ResponseWriter, r *http.Request) {
 		topK = parsed
 	}
 
-	results, err := vectorstore.SearchKnowledge(r.Context(), query, topK, componentID)
+	results, err := vectorstore.SearchKnowledge(r.Context(), query, topK, projectID)
 	if err != nil {
 		response.WriteError(w, http.StatusInternalServerError, "search failed: "+err.Error())
 		return
