@@ -130,6 +130,56 @@ func SearchKnowledge(ctx context.Context, query string, topK int, projectID stri
 	return results, nil
 }
 
+func GetVectorForText(ctx context.Context, text string) ([]float32, error) {
+	client, err := GetWeaviateClient()
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := client.Batch().ObjectsBatcher().
+		WithObjects(&models.Object{
+			Class: CollectionName,
+			Properties: map[string]any{
+				"projectId":      "_simulate_",
+				"knowledgeIndex": 0,
+				"content":        text,
+			},
+		}).
+		Do(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("create vectorization object: %w", err)
+	}
+	if len(resp) == 0 {
+		return nil, fmt.Errorf("batch insert returned no response")
+	}
+	if resp[0].Result != nil && resp[0].Result.Errors != nil {
+		return nil, fmt.Errorf("batch insert error: %v", resp[0].Result.Errors)
+	}
+
+	id := resp[0].Object.ID.String()
+
+	defer func() {
+		_ = client.Data().Deleter().
+			WithClassName(CollectionName).
+			WithID(id).
+			Do(context.Background())
+	}()
+
+	objs, err := client.Data().ObjectsGetter().
+		WithClassName(CollectionName).
+		WithID(id).
+		WithVector().
+		Do(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("retrieve vectorized object: %w", err)
+	}
+	if len(objs) == 0 || objs[0].Vector == nil {
+		return nil, fmt.Errorf("no vector returned for object")
+	}
+
+	return objs[0].Vector, nil
+}
+
 func getString(m map[string]any, key string) string {
 	if v, ok := m[key].(string); ok {
 		return v
