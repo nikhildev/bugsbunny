@@ -15,8 +15,8 @@ type Issue struct {
 	Assignee      User        `json:"assignee" gorm:"foreignKey:AssigneeId;references:ID"`
 	ReporterId    string      `json:"reporter_id" gorm:"type:uuid; not null"`
 	Reporter      User        `json:"reporter" gorm:"foreignKey:ReporterId;references:ID"`
-	ComponentID   string      `json:"component_id" gorm:"type:uuid; not null"`
-	Component     Component   `json:"component" gorm:"foreignKey:ComponentID;references:ID"`
+	ProjectID     string      `json:"project_id" gorm:"type:uuid; not null"`
+	Project       Project     `json:"project" gorm:"foreignKey:ProjectID;references:ID"`
 	Attachments   []string    `json:"attachments" gorm:"type:jsonb;serializer:json"`
 	Priority      Priority    `json:"priority" gorm:"not null;index;default:low"`
 	Severity      Severity    `json:"severity" gorm:"not null;index;default:low"`

@@ -28,7 +28,7 @@ func (h *Handler) GetIssueByID(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) GetIssues(w http.ResponseWriter, r *http.Request) {
 	var issues []model.Issue
-	result := h.DB.Preload("Reporter").Preload("Assignee").Preload("Component").Preload("Collaborators").Preload("CC").Find(&issues)
+	result := h.DB.Preload("Reporter").Preload("Assignee").Preload("Project").Preload("Collaborators").Preload("CC").Find(&issues)
 	if result.Error != nil {
 		slog.Error("Error getting issues", "error", result.Error)
 		response.WriteError(w, http.StatusInternalServerError, "error getting issues")

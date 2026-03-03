@@ -58,8 +58,8 @@ func SetupTestDB(t *testing.T) (*postgres.PostgresContainer, func()) {
 		t.Fatalf("Failed to initialize database: %v", err)
 	}
 
-	// Auto-migrate schema - Component must come first, then Issue, then Comment (due to foreign keys)
-	err = db.AutoMigrate(&model.Component{}, &model.Issue{}, &model.Comment{})
+	// Auto-migrate schema - Project must come first, then Issue, then Comment (due to foreign keys)
+	err = db.AutoMigrate(&model.Project{}, &model.Issue{}, &model.Comment{})
 	if err != nil {
 		t.Fatalf("Failed to migrate database: %v", err)
 	}

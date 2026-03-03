@@ -11,11 +11,11 @@ import (
 //
 // Example usage:
 //
-//	updates := updates.ExtractUpdates(requestData, model.Component{})
+//	updates := updates.ExtractUpdates(requestData, model.Project{})
 //
 // Parameters:
 //   - requestData: map containing the fields from the request body
-//   - model: an instance of the struct type (e.g., model.Component{}, model.Issue{})
+//   - model: an instance of the struct type (e.g., model.Project{}, model.Issue{})
 //
 // Returns:
 //   - map[string]any: map of field names to values that can be used with GORM's Updates()

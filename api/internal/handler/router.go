@@ -3,8 +3,8 @@ package handler
 import (
 	"net/http"
 
-	"github.com/nikhildev/bugsbunny/api/internal/handler/component"
 	"github.com/nikhildev/bugsbunny/api/internal/handler/issue"
+	"github.com/nikhildev/bugsbunny/api/internal/handler/project"
 	"github.com/nikhildev/bugsbunny/api/internal/handler/search"
 	"gorm.io/gorm"
 )
@@ -12,7 +12,7 @@ import (
 func SetupRoutes(db *gorm.DB) *http.ServeMux {
 	mux := http.NewServeMux()
 	RegisterHealthRoutes(mux)
-	component.RegisterComponentRoutes(mux, db)
+	project.RegisterProjectRoutes(mux, db)
 	issue.RegisterIssueRoutes(mux, db)
 	search.RegisterSearchRoutes(mux)
 	return mux

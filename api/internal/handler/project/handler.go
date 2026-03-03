@@ -1,4 +1,4 @@
-package component
+package project
 
 import "gorm.io/gorm"
 

@@ -31,7 +31,7 @@ var migrateCmd = &cobra.Command{
 		}
 
 		if resetDb {
-			if err := db.Migrator().DropTable(&model.User{}, &model.Component{}, &model.Issue{}, &model.Change{}, &model.Comment{}); err != nil {
+			if err := db.Migrator().DropTable(&model.User{}, &model.Project{}, &model.Issue{}, &model.Change{}, &model.Comment{}); err != nil {
 				return fmt.Errorf("drop tables: %w", err)
 			}
 			slog.Info("Tables dropped successfully")
@@ -39,7 +39,7 @@ var migrateCmd = &cobra.Command{
 
 		if err := db.AutoMigrate(
 			&model.User{},
-			&model.Component{},
+			&model.Project{},
 			&model.Issue{},
 			&model.Change{},
 			&model.Comment{},
@@ -58,10 +58,10 @@ var migrateCmd = &cobra.Command{
 				return fmt.Errorf("seed users: %w", err)
 			}
 			slog.Info("Sample users inserted successfully")
-			if err := seedComponents(db); err != nil {
-				return fmt.Errorf("seed components: %w", err)
+			if err := seedProjects(db); err != nil {
+				return fmt.Errorf("seed projects: %w", err)
 			}
-			slog.Info("Sample components inserted successfully")
+			slog.Info("Sample projects inserted successfully")
 			if err := seedIssues(db); err != nil {
 				return fmt.Errorf("seed issues: %w", err)
 			}
@@ -106,17 +106,17 @@ func seedUsers(db *gorm.DB) error {
 	return nil
 }
 
-func seedComponents(db *gorm.DB) error {
-	components := []model.Component{
+func seedProjects(db *gorm.DB) error {
+	projects := []model.Project{
 		{BaseModel: model.BaseModel{ID: "019c48e9-ab2e-7c50-9e03-23f8af4fdd2e"}, Name: "General", Description: "All general issues", Owner: "admin", Status: model.ACTIVE, IsBotEnabled: false, BotKnowledge: []string{}, BotInstructions: []string{}},
 	}
-	for i := range components {
-		result := db.Where("id = ?", components[i].ID).FirstOrCreate(&components[i])
+	for i := range projects {
+		result := db.Where("id = ?", projects[i].ID).FirstOrCreate(&projects[i])
 		if result.Error != nil {
-			return fmt.Errorf("insert component %q: %w", components[i].Name, result.Error)
+			return fmt.Errorf("insert project %q: %w", projects[i].Name, result.Error)
 		}
 	}
-	slog.Info("Sample components inserted successfully")
+	slog.Info("Sample projects inserted successfully")
 	return nil
 }
 
@@ -126,7 +126,7 @@ func seedIssues(db *gorm.DB) error {
 		Description: "Description 1",
 		Status:      model.NEW,
 		ReporterId:  uuid.MustParse("019c48e9-ab2e-7c50-9e03-23f8af4fdd2c").String(),
-		ComponentID: uuid.MustParse("019c48e9-ab2e-7c50-9e03-23f8af4fdd2e").String(),
+		ProjectID:   uuid.MustParse("019c48e9-ab2e-7c50-9e03-23f8af4fdd2e").String(),
 		Type:        model.SUPPORT,
 	}
 	result := db.Create(&issue)
