@@ -1,17 +1,22 @@
 package cli
 
 import (
+	"embed"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 
-	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"github.com/nikhildev/bugsbunny/api/internal/config"
 	"github.com/nikhildev/bugsbunny/api/internal/database"
 	"github.com/nikhildev/bugsbunny/api/internal/model"
 )
+
+//go:embed seeddata/users.json seeddata/projects.json seeddata/issues.json
+var seedFS embed.FS
 
 var autopopulate bool
 var resetDb bool
@@ -54,15 +59,15 @@ var migrateCmd = &cobra.Command{
 		slog.Info("Migrations applied successfully")
 
 		if autopopulate {
-			if err := seedUsers(db); err != nil {
+			if err := seedFromJSON[model.User](db, "seeddata/users.json", true); err != nil {
 				return fmt.Errorf("seed users: %w", err)
 			}
 			slog.Info("Sample users inserted successfully")
-			if err := seedProjects(db); err != nil {
+			if err := seedFromJSON[model.Project](db, "seeddata/projects.json", true); err != nil {
 				return fmt.Errorf("seed projects: %w", err)
 			}
 			slog.Info("Sample projects inserted successfully")
-			if err := seedIssues(db); err != nil {
+			if err := seedFromJSON[model.Issue](db, "seeddata/issues.json", false); err != nil {
 				return fmt.Errorf("seed issues: %w", err)
 			}
 			slog.Info("Sample issues inserted successfully")
@@ -90,50 +95,26 @@ func createDefaultUsers(db *gorm.DB) error {
 	return nil
 }
 
-func seedUsers(db *gorm.DB) error {
-	users := []model.User{
-		{BaseModel: model.BaseModel{ID: "019c48e9-ab2e-7c50-9e03-23f8af4fdd2c"}, Username: "janedoe", Email: "jane.doe@bugsbunny.dev", Password: "jane123", Role: model.Editor, IsActive: true},
-		{BaseModel: model.BaseModel{ID: "019c48e9-ab2e-7c50-9e03-23f8af4fdd2d"}, Username: "johndoe", Email: "john.doe@bugsbunny.dev", Password: "john123", Role: model.Viewer, IsActive: true},
+// seedFromJSON reads a JSON file from the embedded filesystem and batch-inserts
+// the records into the database. When skipConflicts is true, existing rows
+// (matched by primary key) are silently skipped via ON CONFLICT DO NOTHING.
+func seedFromJSON[T any](db *gorm.DB, path string, skipConflicts bool) error {
+	data, err := seedFS.ReadFile(path)
+	if err != nil {
+		return fmt.Errorf("read embedded file %s: %w", path, err)
 	}
-	for i := range users {
-		result := db.Where("id = ?", users[i].ID).FirstOrCreate(&users[i])
-		if result.Error != nil {
-			slog.Error("Failed to insert user", "user", users[i], "error", result.Error)
-			return fmt.Errorf("insert user %q: %w", users[i].Username, result.Error)
-		}
-	}
-	slog.Info("Sample users inserted successfully")
-	return nil
-}
 
-func seedProjects(db *gorm.DB) error {
-	projects := []model.Project{
-		{BaseModel: model.BaseModel{ID: "019c48e9-ab2e-7c50-9e03-23f8af4fdd2e"}, Name: "General", Description: "All general issues", Owner: "admin", Status: model.ACTIVE, IsBotEnabled: false, BotKnowledge: []string{}, BotInstructions: []string{}},
+	var records []T
+	if err := json.Unmarshal(data, &records); err != nil {
+		return fmt.Errorf("unmarshal %s: %w", path, err)
 	}
-	for i := range projects {
-		result := db.Where("id = ?", projects[i].ID).FirstOrCreate(&projects[i])
-		if result.Error != nil {
-			return fmt.Errorf("insert project %q: %w", projects[i].Name, result.Error)
-		}
-	}
-	slog.Info("Sample projects inserted successfully")
-	return nil
-}
 
-func seedIssues(db *gorm.DB) error {
-	issue := model.Issue{
-		Title:       "Issue 1",
-		Description: "Description 1",
-		Status:      model.NEW,
-		ReporterId:  uuid.MustParse("019c48e9-ab2e-7c50-9e03-23f8af4fdd2c").String(),
-		ProjectID:   uuid.MustParse("019c48e9-ab2e-7c50-9e03-23f8af4fdd2e").String(),
-		Type:        model.SUPPORT,
+	tx := db
+	if skipConflicts {
+		tx = tx.Clauses(clause.OnConflict{DoNothing: true})
 	}
-	result := db.Create(&issue)
-	if result.Error != nil {
-		slog.Error("Failed to insert issue", "error", result.Error)
-		return fmt.Errorf("insert issue: %w", result.Error)
+	if result := tx.Create(&records); result.Error != nil {
+		return fmt.Errorf("insert records from %s: %w", path, result.Error)
 	}
-	slog.Info("Sample issue inserted successfully")
 	return nil
 }

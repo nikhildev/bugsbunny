@@ -1,0 +1,18 @@
+[
+  {
+    "id": "019c48e9-ab2e-7c50-9e03-23f8af4fdd2c",
+    "username": "janedoe",
+    "email": "jane.doe@bugsbunny.dev",
+    "password": "jane123",
+    "role": "editor",
+    "is_active": true
+  },
+  {
+    "id": "019c48e9-ab2e-7c50-9e03-23f8af4fdd2d",
+    "username": "johndoe",
+    "email": "john.doe@bugsbunny.dev",
+    "password": "john123",
+    "role": "viewer",
+    "is_active": true
+  }
+]
