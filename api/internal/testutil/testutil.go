@@ -20,7 +20,7 @@ func SetupTestDB(t *testing.T) (*postgres.PostgresContainer, func()) {
 	// Create PostgreSQL container
 	pgContainer, err := postgres.Run(
 		ctx,
-		"postgres:18.1",
+		"postgres:18.3",
 		postgres.WithDatabase("testdb"),
 		postgres.WithUsername("testuser"),
 		postgres.WithPassword("testpass"),
