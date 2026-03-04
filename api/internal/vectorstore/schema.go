@@ -27,31 +27,16 @@ func EnsureSchema(ctx context.Context) error {
 
 	classDef := &models.Class{
 		Class:       CollectionName,
-		Vectorizer:  "text2vec-transformers",
+		Vectorizer:  "none",
 		Description: "Bot knowledge entries for projects",
-		ModuleConfig: map[string]any{
-			"text2vec-transformers": map[string]any{
-				"vectorizeClassName": false,
-			},
-		},
 		Properties: []*models.Property{
 			{
 				Name:     "projectId",
 				DataType: []string{"text"},
-				ModuleConfig: map[string]any{
-					"text2vec-transformers": map[string]any{
-						"skip": true,
-					},
-				},
 			},
 			{
 				Name:     "knowledgeIndex",
 				DataType: []string{"int"},
-				ModuleConfig: map[string]any{
-					"text2vec-transformers": map[string]any{
-						"skip": true,
-					},
-				},
 			},
 			{
 				Name:     "content",

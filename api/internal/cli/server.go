@@ -33,6 +33,12 @@ var serverCmd = &cobra.Command{
 			database.CloseDbClient()
 		}()
 
+		if err := vectorstore.InitEmbeddingClient(cfg.Embedding); err != nil {
+			slog.Warn("Embedding client not available, vector features disabled", "error", err)
+		} else {
+			slog.Info("Embedding client initialized", "model", cfg.Embedding.Model)
+		}
+
 		if err := vectorstore.InitWeaviate(cfg.Weaviate); err != nil {
 			slog.Warn("Weaviate client not available, vector search disabled", "error", err)
 		} else {
