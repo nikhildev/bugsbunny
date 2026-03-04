@@ -8,10 +8,11 @@ import (
 
 // AppConfig holds all application configuration.
 type AppConfig struct {
-	DB       DbConfig
-	Server   ServerConfig
-	OpenAI   OpenAIConfig
-	Weaviate WeaviateConfig
+	DB        DbConfig
+	Server    ServerConfig
+	OpenAI    OpenAIConfig
+	Weaviate  WeaviateConfig
+	Embedding EmbeddingConfig
 }
 
 // DbConfig contains database connection settings.
@@ -39,6 +40,12 @@ type OpenAIConfig struct {
 type WeaviateConfig struct {
 	Host   string
 	Scheme string
+}
+
+// EmbeddingConfig contains settings for the embedding model API.
+type EmbeddingConfig struct {
+	BaseURL string
+	Model   string
 }
 
 // LoadConfig reads all configuration from environment variables and the .env
@@ -70,6 +77,10 @@ func LoadConfig() (AppConfig, error) {
 		Weaviate: WeaviateConfig{
 			Host:   v.GetString("WEAVIATE_HOST"),
 			Scheme: v.GetString("WEAVIATE_SCHEME"),
+		},
+		Embedding: EmbeddingConfig{
+			BaseURL: v.GetString("EMBEDDING_BASE_URL"),
+			Model:   v.GetString("EMBEDDING_MODEL"),
 		},
 	}, nil
 }

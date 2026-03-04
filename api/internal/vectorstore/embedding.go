@@ -1,13 +1,76 @@
 package vectorstore
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
+	"net/http"
 
+	"github.com/nikhildev/bugsbunny/api/internal/config"
 	"github.com/weaviate/weaviate-go-client/v5/weaviate/filters"
 	"github.com/weaviate/weaviate-go-client/v5/weaviate/graphql"
 	"github.com/weaviate/weaviate/entities/models"
 )
+
+var embeddingBaseURL string
+var embeddingModel string
+
+func InitEmbeddingClient(cfg config.EmbeddingConfig) error {
+	if cfg.BaseURL == "" {
+		return errors.New("EMBEDDING_BASE_URL is not set")
+	}
+	if cfg.Model == "" {
+		return errors.New("EMBEDDING_MODEL is not set")
+	}
+	embeddingBaseURL = cfg.BaseURL
+	embeddingModel = cfg.Model
+	return nil
+}
+
+func getEmbedding(ctx context.Context, text string) ([]float32, error) {
+	if embeddingBaseURL == "" {
+		return nil, errors.New("embedding client not initialized")
+	}
+
+	body, err := json.Marshal(map[string]any{
+		"model": embeddingModel,
+		"input": text,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("marshal embedding request: %w", err)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, embeddingBaseURL+"/embeddings", bytes.NewReader(body))
+	if err != nil {
+		return nil, fmt.Errorf("create embedding request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("call embedding API: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("embedding API returned status %d", resp.StatusCode)
+	}
+
+	var result struct {
+		Data []struct {
+			Embedding []float32 `json:"embedding"`
+		} `json:"data"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, fmt.Errorf("decode embedding response: %w", err)
+	}
+	if len(result.Data) == 0 {
+		return nil, fmt.Errorf("embedding API returned no data")
+	}
+	return result.Data[0].Embedding, nil
+}
 
 type SearchResult struct {
 	ProjectID      string  `json:"project_id"`
@@ -38,9 +101,12 @@ func SyncProjectKnowledge(ctx context.Context, projectID string, knowledge []str
 		return nil
 	}
 
-	// Insert new entries — Weaviate auto-embeds the content property
 	batcher := client.Batch().ObjectsBatcher()
 	for i, entry := range knowledge {
+		vector, err := getEmbedding(ctx, entry)
+		if err != nil {
+			return fmt.Errorf("embed knowledge entry %d: %w", i, err)
+		}
 		batcher.WithObjects(&models.Object{
 			Class: CollectionName,
 			Properties: map[string]any{
@@ -48,6 +114,7 @@ func SyncProjectKnowledge(ctx context.Context, projectID string, knowledge []str
 				"knowledgeIndex": i,
 				"content":        entry,
 			},
+			Vector: models.C11yVector(vector),
 		})
 	}
 
@@ -69,6 +136,11 @@ func SearchKnowledge(ctx context.Context, query string, topK int, projectID stri
 		return nil, err
 	}
 
+	queryVector, err := getEmbedding(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("embed query: %w", err)
+	}
+
 	fields := []graphql.Field{
 		{Name: "projectId"},
 		{Name: "knowledgeIndex"},
@@ -79,7 +151,7 @@ func SearchKnowledge(ctx context.Context, query string, topK int, projectID stri
 	builder := client.GraphQL().Get().
 		WithClassName(CollectionName).
 		WithFields(fields...).
-		WithNearText(client.GraphQL().NearTextArgBuilder().WithConcepts([]string{query})).
+		WithNearVector(client.GraphQL().NearVectorArgBuilder().WithVector(queryVector)).
 		WithLimit(topK)
 
 	if projectID != "" {
@@ -89,16 +161,16 @@ func SearchKnowledge(ctx context.Context, query string, topK int, projectID stri
 			WithValueString(projectID))
 	}
 
-	resp, err := builder.Do(ctx)
+	result, err := builder.Do(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("search knowledge: %w", err)
 	}
 
-	if resp.Errors != nil {
-		return nil, fmt.Errorf("graphql errors: %v", resp.Errors)
+	if result.Errors != nil {
+		return nil, fmt.Errorf("graphql errors: %v", result.Errors)
 	}
 
-	data, ok := resp.Data["Get"].(map[string]any)
+	data, ok := result.Data["Get"].(map[string]any)
 	if !ok {
 		return nil, nil
 	}
@@ -131,53 +203,7 @@ func SearchKnowledge(ctx context.Context, query string, topK int, projectID stri
 }
 
 func GetVectorForText(ctx context.Context, text string) ([]float32, error) {
-	client, err := GetWeaviateClient()
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := client.Batch().ObjectsBatcher().
-		WithObjects(&models.Object{
-			Class: CollectionName,
-			Properties: map[string]any{
-				"projectId":      "_simulate_",
-				"knowledgeIndex": 0,
-				"content":        text,
-			},
-		}).
-		Do(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("create vectorization object: %w", err)
-	}
-	if len(resp) == 0 {
-		return nil, fmt.Errorf("batch insert returned no response")
-	}
-	if resp[0].Result != nil && resp[0].Result.Errors != nil {
-		return nil, fmt.Errorf("batch insert error: %v", resp[0].Result.Errors)
-	}
-
-	id := resp[0].Object.ID.String()
-
-	defer func() {
-		_ = client.Data().Deleter().
-			WithClassName(CollectionName).
-			WithID(id).
-			Do(context.Background())
-	}()
-
-	objs, err := client.Data().ObjectsGetter().
-		WithClassName(CollectionName).
-		WithID(id).
-		WithVector().
-		Do(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("retrieve vectorized object: %w", err)
-	}
-	if len(objs) == 0 || objs[0].Vector == nil {
-		return nil, fmt.Errorf("no vector returned for object")
-	}
-
-	return objs[0].Vector, nil
+	return getEmbedding(ctx, text)
 }
 
 func getString(m map[string]any, key string) string {
