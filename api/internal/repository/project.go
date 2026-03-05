@@ -5,6 +5,14 @@ import (
 	"gorm.io/gorm"
 )
 
+type ProjectRepo interface {
+	Create(project *model.Project) error
+	GetByID(id string) (model.Project, error)
+	GetAll() ([]model.Project, error)
+	Update(id string, updates map[string]any) (int64, error)
+	Delete(id string) error
+}
+
 type ProjectRepository struct {
 	DB *gorm.DB
 }

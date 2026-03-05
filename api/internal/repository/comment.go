@@ -5,6 +5,10 @@ import (
 	"gorm.io/gorm"
 )
 
+type CommentRepo interface {
+	Create(comment *model.Comment) error
+}
+
 type CommentRepository struct {
 	DB *gorm.DB
 }

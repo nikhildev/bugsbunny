@@ -7,7 +7,7 @@ import (
 	"github.com/nikhildev/bugsbunny/api/internal/repository"
 )
 
-func RegisterIssueRoutes(mux *http.ServeMux, issueRepo *repository.IssueRepository, commentRepo *repository.CommentRepository) {
+func RegisterIssueRoutes(mux *http.ServeMux, issueRepo repository.IssueRepo, commentRepo repository.CommentRepo) {
 	h := &Handler{Repo: issueRepo}
 	ch := &comment.Handler{Repo: commentRepo}
 	mux.HandleFunc("GET /issues", h.GetIssues)

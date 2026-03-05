@@ -6,6 +6,6 @@ import (
 )
 
 type Handler struct {
-	Repo        *repository.ProjectRepository
+	Repo        repository.ProjectRepo
 	VectorStore *vectorstore.VectorStore
 }

@@ -5,6 +5,14 @@ import (
 	"gorm.io/gorm"
 )
 
+type IssueRepo interface {
+	Create(issue *model.Issue) error
+	GetByID(id string) (model.Issue, error)
+	GetAll() ([]model.Issue, error)
+	Update(id string, updates map[string]any) (int64, error)
+	Delete(id string) error
+}
+
 type IssueRepository struct {
 	DB *gorm.DB
 }
