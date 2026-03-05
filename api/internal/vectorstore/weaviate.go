@@ -6,24 +6,18 @@ import (
 	"fmt"
 
 	"github.com/nikhildev/bugsbunny/api/internal/config"
+	"github.com/nikhildev/bugsbunny/api/internal/embedding"
 	"github.com/weaviate/weaviate-go-client/v5/weaviate"
 )
 
 type VectorStore struct {
-	client           *weaviate.Client
-	embeddingBaseURL string
-	embeddingModel   string
+	client   *weaviate.Client
+	embedder *embedding.Client
 }
 
-func NewVectorStore(cfg config.WeaviateConfig, embCfg config.EmbeddingConfig) (*VectorStore, error) {
+func NewVectorStore(cfg config.WeaviateConfig, embedder *embedding.Client) (*VectorStore, error) {
 	if cfg.Host == "" {
 		return nil, errors.New("WEAVIATE_HOST is not set")
-	}
-	if embCfg.BaseURL == "" {
-		return nil, errors.New("EMBEDDING_BASE_URL is not set")
-	}
-	if embCfg.Model == "" {
-		return nil, errors.New("EMBEDDING_MODEL is not set")
 	}
 
 	scheme := cfg.Scheme
@@ -39,9 +33,8 @@ func NewVectorStore(cfg config.WeaviateConfig, embCfg config.EmbeddingConfig) (*
 	}
 
 	vs := &VectorStore{
-		client:           client,
-		embeddingBaseURL: embCfg.BaseURL,
-		embeddingModel:   embCfg.Model,
+		client:   client,
+		embedder: embedder,
 	}
 
 	if err := vs.ensureSchema(context.Background()); err != nil {

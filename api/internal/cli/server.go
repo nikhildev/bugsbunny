@@ -6,6 +6,7 @@ import (
 
 	"github.com/nikhildev/bugsbunny/api/internal/config"
 	"github.com/nikhildev/bugsbunny/api/internal/database"
+	"github.com/nikhildev/bugsbunny/api/internal/embedding"
 	"github.com/nikhildev/bugsbunny/api/internal/handler"
 	"github.com/nikhildev/bugsbunny/api/internal/middleware"
 	"github.com/nikhildev/bugsbunny/api/internal/vectorstore"
@@ -33,11 +34,16 @@ var serverCmd = &cobra.Command{
 		}()
 
 		var vs *vectorstore.VectorStore
-		vs, err = vectorstore.NewVectorStore(cfg.Weaviate, cfg.Embedding)
+		embedder, err := embedding.NewClient(cfg.Embedding)
 		if err != nil {
 			slog.Warn("Vector store not available, vector features disabled", "error", err)
 		} else {
-			slog.Info("Vector store initialized", "model", cfg.Embedding.Model)
+			vs, err = vectorstore.NewVectorStore(cfg.Weaviate, embedder)
+			if err != nil {
+				slog.Warn("Vector store not available, vector features disabled", "error", err)
+			} else {
+				slog.Info("Vector store initialized", "model", cfg.Embedding.Model)
+			}
 		}
 
 		addr := cfg.Server.Host + ":" + cfg.Server.Port
