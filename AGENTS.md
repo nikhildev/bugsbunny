@@ -24,7 +24,7 @@ Follow these conventions unless the user explicitly asks for something different
       - **`component/`**: Component CRUD handlers.
       - **`comment/`**: Comment handlers.
     - **`middleware/`**: HTTP middleware (CORS, logging, recovery, chain).
-    - **`response/`**: JSON response helpers (`WriteJSON`, `WriteError`, `JSONSuccess`, `JSONError`).
+    - **`httputil/`**: JSON response helpers (`WriteJSON`, `WriteError`, `JSONSuccess`, `JSONError`).
     - **`updates/`**: Generic struct-to-map update extraction (`ExtractUpdates`).
     - **`testutil/`**: Shared test utilities (testcontainer setup, etc.).
 - **`frontend/`**: Bun + React app.
@@ -101,7 +101,7 @@ Follow these conventions unless the user explicitly asks for something different
     - Configuration → `api/internal/config/`.
     - Database management → `api/internal/database/`.
     - HTTP middleware → `api/internal/middleware/`.
-    - JSON response helpers → `api/internal/response/`.
+    - JSON response helpers → `api/internal/httputil/`.
     - Shared logic that isn’t domain‑specific → appropriate `internal/` sub-package.
   - Prefer standard library + existing dependencies; avoid adding new frameworks unless necessary and justified.
 

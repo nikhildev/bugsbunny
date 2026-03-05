@@ -4,13 +4,13 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/nikhildev/bugsbunny/api/internal/response"
+	"github.com/nikhildev/bugsbunny/api/internal/httputil"
 )
 
 func (h *Handler) SearchKnowledge(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query().Get("q")
 	if query == "" {
-		response.WriteError(w, http.StatusBadRequest, "q parameter is required")
+		httputil.WriteError(w, http.StatusBadRequest, "q parameter is required")
 		return
 	}
 
@@ -20,7 +20,7 @@ func (h *Handler) SearchKnowledge(w http.ResponseWriter, r *http.Request) {
 	if tkStr := r.URL.Query().Get("top_k"); tkStr != "" {
 		parsed, err := strconv.Atoi(tkStr)
 		if err != nil || parsed < 1 {
-			response.WriteError(w, http.StatusBadRequest, "top_k must be a positive integer")
+			httputil.WriteError(w, http.StatusBadRequest, "top_k must be a positive integer")
 			return
 		}
 		if parsed > 20 {
@@ -31,11 +31,11 @@ func (h *Handler) SearchKnowledge(w http.ResponseWriter, r *http.Request) {
 
 	results, err := h.VectorStore.SearchKnowledge(r.Context(), query, topK, projectID)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "search failed: "+err.Error())
+		httputil.WriteError(w, http.StatusInternalServerError, "search failed: "+err.Error())
 		return
 	}
 
-	response.WriteJSON(w, http.StatusOK, map[string]any{
+	httputil.WriteJSON(w, http.StatusOK, map[string]any{
 		"query":   query,
 		"top_k":   topK,
 		"results": results,

@@ -6,7 +6,7 @@ import (
 	"runtime/debug"
 	"time"
 
-	"github.com/nikhildev/bugsbunny/api/internal/response"
+	"github.com/nikhildev/bugsbunny/api/internal/httputil"
 )
 
 // CORSMiddleware sets CORS headers on all responses and handles OPTIONS preflight.
@@ -55,7 +55,7 @@ func RecoveryMiddleware(next http.Handler) http.Handler {
 		defer func() {
 			if rec := recover(); rec != nil {
 				slog.Error("panic recovered", "error", rec, "stack", string(debug.Stack()))
-				response.JSONError(w, "internal server error", http.StatusInternalServerError)
+				httputil.JSONError(w, "internal server error", http.StatusInternalServerError)
 			}
 		}()
 		next.ServeHTTP(w, r)

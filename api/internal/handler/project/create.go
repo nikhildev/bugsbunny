@@ -8,32 +8,32 @@ import (
 	"net/http"
 
 	"github.com/nikhildev/bugsbunny/api/internal/model"
-	"github.com/nikhildev/bugsbunny/api/internal/response"
+	"github.com/nikhildev/bugsbunny/api/internal/httputil"
 )
 
 func (h *Handler) CreateProject(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		slog.Error("Error reading request body", "error", err)
-		response.WriteError(w, http.StatusInternalServerError, "error reading request body")
+		httputil.WriteError(w, http.StatusInternalServerError, "error reading request body")
 		return
 	}
 
 	var project model.Project
 	if err = json.Unmarshal(body, &project); err != nil {
 		slog.Error("Error unmarshalling request body", "error", err)
-		response.WriteError(w, http.StatusBadRequest, "invalid request body")
+		httputil.WriteError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
 	if project.Name == "" || project.Description == "" || project.Owner == "" {
-		response.WriteError(w, http.StatusBadRequest, "name, description, and owner are required")
+		httputil.WriteError(w, http.StatusBadRequest, "name, description, and owner are required")
 		return
 	}
 
 	if err = h.Repo.Create(&project); err != nil {
 		slog.Error("Error creating project", "error", err)
-		response.WriteError(w, http.StatusInternalServerError, "error creating project")
+		httputil.WriteError(w, http.StatusInternalServerError, "error creating project")
 		return
 	}
 
@@ -45,5 +45,5 @@ func (h *Handler) CreateProject(w http.ResponseWriter, r *http.Request) {
 		}()
 	}
 
-	response.WriteJSON(w, http.StatusCreated, project)
+	httputil.WriteJSON(w, http.StatusCreated, project)
 }

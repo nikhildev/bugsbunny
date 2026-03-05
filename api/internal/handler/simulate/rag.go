@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/nikhildev/bugsbunny/api/internal/response"
+	"github.com/nikhildev/bugsbunny/api/internal/httputil"
 )
 
 func (h *Handler) RAG(w http.ResponseWriter, r *http.Request) {
@@ -12,21 +12,21 @@ func (h *Handler) RAG(w http.ResponseWriter, r *http.Request) {
 		Text string `json:"text"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		response.WriteError(w, http.StatusBadRequest, "invalid request body")
+		httputil.WriteError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 	if req.Text == "" {
-		response.WriteError(w, http.StatusBadRequest, "text is required")
+		httputil.WriteError(w, http.StatusBadRequest, "text is required")
 		return
 	}
 
 	vector, err := h.VectorStore.GetVectorForText(r.Context(), req.Text)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "vectorization failed: "+err.Error())
+		httputil.WriteError(w, http.StatusInternalServerError, "vectorization failed: "+err.Error())
 		return
 	}
 
-	response.WriteJSON(w, http.StatusOK, map[string]any{
+	httputil.WriteJSON(w, http.StatusOK, map[string]any{
 		"text":       req.Text,
 		"vector":     vector,
 		"dimensions": len(vector),
