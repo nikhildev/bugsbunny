@@ -84,24 +84,3 @@ func LoadConfig() (AppConfig, error) {
 		},
 	}, nil
 }
-
-// GetDbConfig reads database configuration from environment variables and the
-// .env file.
-func GetDbConfig() (DbConfig, error) {
-	v := viper.New()
-	v.AutomaticEnv()
-	v.SetEnvPrefix("DB")
-	v.SetConfigFile(".env")
-	v.SetConfigType("env")
-	if err := v.ReadInConfig(); err != nil {
-		return DbConfig{}, fmt.Errorf("failed to read database config: %w", err)
-	}
-	return DbConfig{
-		Host:     v.GetString("DB_HOST"),
-		Port:     v.GetString("DB_PORT"),
-		User:     v.GetString("DB_USER"),
-		Password: v.GetString("DB_PASSWORD"),
-		Name:     v.GetString("DB_NAME"),
-		SSLMode:  v.GetString("DB_SSL_MODE"),
-	}, nil
-}
