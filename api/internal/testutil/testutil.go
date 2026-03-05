@@ -10,11 +10,12 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
+	"gorm.io/gorm"
 )
 
 // SetupTestDB sets up a PostgreSQL testcontainer and initializes the database
-// with the necessary schema migrations. Returns the container and a cleanup function.
-func SetupTestDB(t *testing.T) (*postgres.PostgresContainer, func()) {
+// with the necessary schema migrations. Returns the db instance and a cleanup function.
+func SetupTestDB(t *testing.T) (*gorm.DB, func()) {
 	ctx := context.Background()
 
 	// Create PostgreSQL container
@@ -66,11 +67,11 @@ func SetupTestDB(t *testing.T) (*postgres.PostgresContainer, func()) {
 
 	// Return cleanup function
 	cleanup := func() {
-		database.CloseDbClient()
+		database.CloseDB(db)
 		if err := pgContainer.Terminate(ctx); err != nil {
 			t.Logf("Failed to terminate container: %v", err)
 		}
 	}
 
-	return pgContainer, cleanup
+	return db, cleanup
 }

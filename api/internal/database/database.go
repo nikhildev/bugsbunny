@@ -10,8 +10,6 @@ import (
 	"gorm.io/gorm"
 )
 
-var DB *gorm.DB
-
 func InitDB(dbConfig config.DbConfig) (*gorm.DB, error) {
 	slog.Info("initializing database...")
 	dsn := fmt.Sprintf(
@@ -23,24 +21,16 @@ func InitDB(dbConfig config.DbConfig) (*gorm.DB, error) {
 	if err != nil {
 		return nil, errors.New("failed to connect database: " + err.Error())
 	}
-	DB = db
 	return db, nil
 }
 
-func GetDbClient() (*gorm.DB, error) {
-	if DB == nil {
-		return nil, errors.New("database not initialized: call InitDB first")
-	}
-	return DB, nil
-}
-
-func CloseDbClient() {
-	db, err := DB.DB()
+func CloseDB(db *gorm.DB) {
+	sqlDB, err := db.DB()
 	if err != nil {
 		slog.Error("failed to get database client", "error", err)
 		return
 	}
-	if err = db.Close(); err != nil {
+	if err = sqlDB.Close(); err != nil {
 		slog.Error("failed to close database client", "error", err)
 		return
 	}

@@ -4,45 +4,24 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 
-	"github.com/nikhildev/bugsbunny/api/internal/config"
 	"github.com/weaviate/weaviate-go-client/v5/weaviate/filters"
 	"github.com/weaviate/weaviate-go-client/v5/weaviate/graphql"
 	"github.com/weaviate/weaviate/entities/models"
 )
 
-var embeddingBaseURL string
-var embeddingModel string
-
-func InitEmbeddingClient(cfg config.EmbeddingConfig) error {
-	if cfg.BaseURL == "" {
-		return errors.New("EMBEDDING_BASE_URL is not set")
-	}
-	if cfg.Model == "" {
-		return errors.New("EMBEDDING_MODEL is not set")
-	}
-	embeddingBaseURL = cfg.BaseURL
-	embeddingModel = cfg.Model
-	return nil
-}
-
-func getEmbedding(ctx context.Context, text string) ([]float32, error) {
-	if embeddingBaseURL == "" {
-		return nil, errors.New("embedding client not initialized")
-	}
-
+func (vs *VectorStore) getEmbedding(ctx context.Context, text string) ([]float32, error) {
 	body, err := json.Marshal(map[string]any{
-		"model": embeddingModel,
+		"model": vs.embeddingModel,
 		"input": text,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("marshal embedding request: %w", err)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, embeddingBaseURL+"/embeddings", bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, vs.embeddingBaseURL+"/embeddings", bytes.NewReader(body))
 	if err != nil {
 		return nil, fmt.Errorf("create embedding request: %w", err)
 	}
@@ -79,14 +58,9 @@ type SearchResult struct {
 	Distance       float64 `json:"distance"`
 }
 
-func SyncProjectKnowledge(ctx context.Context, projectID string, knowledge []string) error {
-	client, err := GetWeaviateClient()
-	if err != nil {
-		return err
-	}
-
+func (vs *VectorStore) SyncProjectKnowledge(ctx context.Context, projectID string, knowledge []string) error {
 	// Delete existing entries for this project
-	_, err = client.Batch().ObjectsBatchDeleter().
+	_, err := vs.client.Batch().ObjectsBatchDeleter().
 		WithClassName(CollectionName).
 		WithWhere(filters.Where().
 			WithPath([]string{"projectId"}).
@@ -101,9 +75,9 @@ func SyncProjectKnowledge(ctx context.Context, projectID string, knowledge []str
 		return nil
 	}
 
-	batcher := client.Batch().ObjectsBatcher()
+	batcher := vs.client.Batch().ObjectsBatcher()
 	for i, entry := range knowledge {
-		vector, err := getEmbedding(ctx, entry)
+		vector, err := vs.getEmbedding(ctx, entry)
 		if err != nil {
 			return fmt.Errorf("embed knowledge entry %d: %w", i, err)
 		}
@@ -130,13 +104,8 @@ func SyncProjectKnowledge(ctx context.Context, projectID string, knowledge []str
 	return nil
 }
 
-func SearchKnowledge(ctx context.Context, query string, topK int, projectID string) ([]SearchResult, error) {
-	client, err := GetWeaviateClient()
-	if err != nil {
-		return nil, err
-	}
-
-	queryVector, err := getEmbedding(ctx, query)
+func (vs *VectorStore) SearchKnowledge(ctx context.Context, query string, topK int, projectID string) ([]SearchResult, error) {
+	queryVector, err := vs.getEmbedding(ctx, query)
 	if err != nil {
 		return nil, fmt.Errorf("embed query: %w", err)
 	}
@@ -148,10 +117,10 @@ func SearchKnowledge(ctx context.Context, query string, topK int, projectID stri
 		{Name: "_additional", Fields: []graphql.Field{{Name: "distance"}}},
 	}
 
-	builder := client.GraphQL().Get().
+	builder := vs.client.GraphQL().Get().
 		WithClassName(CollectionName).
 		WithFields(fields...).
-		WithNearVector(client.GraphQL().NearVectorArgBuilder().WithVector(queryVector)).
+		WithNearVector(vs.client.GraphQL().NearVectorArgBuilder().WithVector(queryVector)).
 		WithLimit(topK)
 
 	if projectID != "" {
@@ -202,8 +171,8 @@ func SearchKnowledge(ctx context.Context, query string, topK int, projectID stri
 	return results, nil
 }
 
-func GetVectorForText(ctx context.Context, text string) ([]float32, error) {
-	return getEmbedding(ctx, text)
+func (vs *VectorStore) GetVectorForText(ctx context.Context, text string) ([]float32, error) {
+	return vs.getEmbedding(ctx, text)
 }
 
 func getString(m map[string]any, key string) string {

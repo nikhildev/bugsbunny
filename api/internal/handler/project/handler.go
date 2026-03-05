@@ -1,8 +1,11 @@
 package project
 
-import "gorm.io/gorm"
+import (
+	"github.com/nikhildev/bugsbunny/api/internal/vectorstore"
+	"gorm.io/gorm"
+)
 
 type Handler struct {
-	DB                *gorm.DB
-	VectorSyncEnabled bool
+	DB          *gorm.DB
+	VectorStore *vectorstore.VectorStore
 }

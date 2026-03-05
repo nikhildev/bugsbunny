@@ -9,13 +9,8 @@ import (
 
 const CollectionName = "BotKnowledge"
 
-func EnsureSchema(ctx context.Context) error {
-	client, err := GetWeaviateClient()
-	if err != nil {
-		return err
-	}
-
-	exists, err := client.Schema().ClassExistenceChecker().
+func (vs *VectorStore) ensureSchema(ctx context.Context) error {
+	exists, err := vs.client.Schema().ClassExistenceChecker().
 		WithClassName(CollectionName).
 		Do(ctx)
 	if err != nil {
@@ -45,7 +40,7 @@ func EnsureSchema(ctx context.Context) error {
 		},
 	}
 
-	err = client.Schema().ClassCreator().
+	err = vs.client.Schema().ClassCreator().
 		WithClass(classDef).
 		Do(ctx)
 	if err != nil {

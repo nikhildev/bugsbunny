@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"context"
 	"log/slog"
 	"net/http"
 
@@ -30,29 +29,20 @@ var serverCmd = &cobra.Command{
 
 		defer func() {
 			slog.Info("Closing database connection")
-			database.CloseDbClient()
+			database.CloseDB(db)
 		}()
 
-		if err := vectorstore.InitEmbeddingClient(cfg.Embedding); err != nil {
-			slog.Warn("Embedding client not available, vector features disabled", "error", err)
+		var vs *vectorstore.VectorStore
+		vs, err = vectorstore.NewVectorStore(cfg.Weaviate, cfg.Embedding)
+		if err != nil {
+			slog.Warn("Vector store not available, vector features disabled", "error", err)
 		} else {
-			slog.Info("Embedding client initialized", "model", cfg.Embedding.Model)
-		}
-
-		if err := vectorstore.InitWeaviate(cfg.Weaviate); err != nil {
-			slog.Warn("Weaviate client not available, vector search disabled", "error", err)
-		} else {
-			slog.Info("Weaviate client initialized")
-			if err := vectorstore.EnsureSchema(context.Background()); err != nil {
-				slog.Warn("Failed to ensure Weaviate schema", "error", err)
-			} else {
-				slog.Info("Weaviate schema ready")
-			}
+			slog.Info("Vector store initialized", "model", cfg.Embedding.Model)
 		}
 
 		addr := cfg.Server.Host + ":" + cfg.Server.Port
 		slog.Info("Starting server", "addr", addr)
-		mux := handler.SetupRoutes(db)
+		mux := handler.SetupRoutes(db, vs)
 		h := middleware.Chain(mux, middleware.RecoveryMiddleware, middleware.LoggingMiddleware, middleware.CORSMiddleware)
 		return http.ListenAndServe(addr, h)
 	},

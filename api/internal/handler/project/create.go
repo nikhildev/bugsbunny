@@ -9,7 +9,6 @@ import (
 
 	"github.com/nikhildev/bugsbunny/api/internal/model"
 	"github.com/nikhildev/bugsbunny/api/internal/response"
-	"github.com/nikhildev/bugsbunny/api/internal/vectorstore"
 )
 
 func (h *Handler) CreateProject(w http.ResponseWriter, r *http.Request) {
@@ -39,9 +38,9 @@ func (h *Handler) CreateProject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if h.VectorSyncEnabled && len(project.BotKnowledge) > 0 {
+	if h.VectorStore != nil && len(project.BotKnowledge) > 0 {
 		go func() {
-			if err := vectorstore.SyncProjectKnowledge(context.Background(), project.ID, project.BotKnowledge); err != nil {
+			if err := h.VectorStore.SyncProjectKnowledge(context.Background(), project.ID, project.BotKnowledge); err != nil {
 				slog.Error("Error syncing project knowledge vectors", "id", project.ID, "error", err)
 			}
 		}()

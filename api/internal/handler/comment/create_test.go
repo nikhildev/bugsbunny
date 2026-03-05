@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/nikhildev/bugsbunny/api/internal/database"
 	"github.com/nikhildev/bugsbunny/api/internal/model"
 	"github.com/nikhildev/bugsbunny/api/internal/testutil"
 	"github.com/stretchr/testify/assert"
@@ -17,11 +16,10 @@ import (
 
 func TestCreateCommentHandler_Success(t *testing.T) {
 	// Setup
-	_, cleanup := testutil.SetupTestDB(t)
+	db, cleanup := testutil.SetupTestDB(t)
 	defer cleanup()
 
 	// Create test data: Project and Issue (required for foreign keys)
-	db, _ := database.GetDbClient()
 
 	// Create Project first - BeforeCreate checks if ID is empty
 	project := model.Project{
@@ -110,10 +108,8 @@ func TestCreateCommentHandler_Success(t *testing.T) {
 
 func TestCreateCommentHandler_MissingIssueID(t *testing.T) {
 	// Setup
-	_, cleanup := testutil.SetupTestDB(t)
+	db, cleanup := testutil.SetupTestDB(t)
 	defer cleanup()
-
-	db, _ := database.GetDbClient()
 
 	// Prepare request body
 	authorUUID, _ := uuid.NewV7()
@@ -141,10 +137,8 @@ func TestCreateCommentHandler_MissingIssueID(t *testing.T) {
 
 func TestCreateCommentHandler_InvalidJSON(t *testing.T) {
 	// Setup
-	_, cleanup := testutil.SetupTestDB(t)
+	db, cleanup := testutil.SetupTestDB(t)
 	defer cleanup()
-
-	db, _ := database.GetDbClient()
 
 	issueID, _ := uuid.NewV7()
 	issueIDStr := issueID.String()
@@ -169,10 +163,8 @@ func TestCreateCommentHandler_InvalidJSON(t *testing.T) {
 
 func TestCreateCommentHandler_InvalidUserUUID(t *testing.T) {
 	// Setup
-	_, cleanup := testutil.SetupTestDB(t)
+	db, cleanup := testutil.SetupTestDB(t)
 	defer cleanup()
-
-	db, _ := database.GetDbClient()
 
 	issueID, _ := uuid.NewV7()
 	issueIDStr := issueID.String()
@@ -202,10 +194,8 @@ func TestCreateCommentHandler_InvalidUserUUID(t *testing.T) {
 
 func TestCreateCommentHandler_MissingUserUUID(t *testing.T) {
 	// Setup
-	_, cleanup := testutil.SetupTestDB(t)
+	db, cleanup := testutil.SetupTestDB(t)
 	defer cleanup()
-
-	db, _ := database.GetDbClient()
 
 	issueID, _ := uuid.NewV7()
 	issueIDStr := issueID.String()
@@ -234,11 +224,10 @@ func TestCreateCommentHandler_MissingUserUUID(t *testing.T) {
 
 func TestCreateCommentHandler_EmptyContent(t *testing.T) {
 	// Setup
-	_, cleanup := testutil.SetupTestDB(t)
+	db, cleanup := testutil.SetupTestDB(t)
 	defer cleanup()
 
 	// Create test data: Project and Issue (required for foreign keys)
-	db, _ := database.GetDbClient()
 
 	// Create Project first - BeforeCreate checks if ID is empty
 	project := model.Project{

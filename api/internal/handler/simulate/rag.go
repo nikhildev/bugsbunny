@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/nikhildev/bugsbunny/api/internal/response"
-	"github.com/nikhildev/bugsbunny/api/internal/vectorstore"
 )
 
 func (h *Handler) RAG(w http.ResponseWriter, r *http.Request) {
@@ -21,7 +20,7 @@ func (h *Handler) RAG(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vector, err := vectorstore.GetVectorForText(r.Context(), req.Text)
+	vector, err := h.VectorStore.GetVectorForText(r.Context(), req.Text)
 	if err != nil {
 		response.WriteError(w, http.StatusInternalServerError, "vectorization failed: "+err.Error())
 		return
