@@ -1,0 +1,10 @@
+[
+  {
+    "title": "Issue 1",
+    "description": "Description 1",
+    "status": "new",
+    "reporter_id": "019c48e9-ab2e-7c50-9e03-23f8af4fdd2c",
+    "project_id": "019c48e9-ab2e-7c50-9e03-23f8af4fdd2e",
+    "type": "support"
+  }
+]

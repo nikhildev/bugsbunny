@@ -1,0 +1,12 @@
+[
+  {
+    "id": "019c48e9-ab2e-7c50-9e03-23f8af4fdd2e",
+    "name": "General",
+    "description": "All general issues",
+    "owner": "admin",
+    "status": "active",
+    "is_bot_enabled": false,
+    "bot_knowledge": [],
+    "bot_instructions": []
+  }
+]
