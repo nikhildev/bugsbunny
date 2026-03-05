@@ -1,11 +1,11 @@
 package project
 
 import (
+	"github.com/nikhildev/bugsbunny/api/internal/repository"
 	"github.com/nikhildev/bugsbunny/api/internal/vectorstore"
-	"gorm.io/gorm"
 )
 
 type Handler struct {
-	DB          *gorm.DB
+	Repo        repository.ProjectRepo
 	VectorStore *vectorstore.VectorStore
 }

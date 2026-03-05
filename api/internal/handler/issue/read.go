@@ -4,7 +4,6 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/nikhildev/bugsbunny/api/internal/model"
 	"github.com/nikhildev/bugsbunny/api/internal/response"
 )
 
@@ -15,10 +14,9 @@ func (h *Handler) GetIssueByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var issue model.Issue
-	result := h.DB.First(&issue, "id = ?", id)
-	if result.Error != nil {
-		slog.Error("Issue not found", "error", result.Error)
+	issue, err := h.Repo.GetByID(id)
+	if err != nil {
+		slog.Error("Issue not found", "error", err)
 		response.WriteError(w, http.StatusNotFound, "issue not found")
 		return
 	}
@@ -27,10 +25,9 @@ func (h *Handler) GetIssueByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetIssues(w http.ResponseWriter, r *http.Request) {
-	var issues []model.Issue
-	result := h.DB.Preload("Reporter").Preload("Assignee").Preload("Project").Preload("Collaborators").Preload("CC").Find(&issues)
-	if result.Error != nil {
-		slog.Error("Error getting issues", "error", result.Error)
+	issues, err := h.Repo.GetAll()
+	if err != nil {
+		slog.Error("Error getting issues", "error", err)
 		response.WriteError(w, http.StatusInternalServerError, "error getting issues")
 		return
 	}

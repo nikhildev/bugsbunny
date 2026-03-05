@@ -38,19 +38,19 @@ func (h *Handler) UpdateIssue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := h.DB.Model(&model.Issue{}).Where("id = ?", id).Updates(u)
-	if result.Error != nil {
-		slog.Error("Error updating issue", "id", id, "error", result.Error)
+	rowsAffected, err := h.Repo.Update(id, u)
+	if err != nil {
+		slog.Error("Error updating issue", "id", id, "error", err)
 		response.WriteError(w, http.StatusInternalServerError, "error updating issue")
 		return
 	}
-	if result.RowsAffected == 0 {
+	if rowsAffected == 0 {
 		response.WriteError(w, http.StatusNotFound, "issue not found")
 		return
 	}
 
-	var updatedIssue model.Issue
-	if err = h.DB.Where("id = ?", id).First(&updatedIssue).Error; err != nil {
+	updatedIssue, err := h.Repo.GetByID(id)
+	if err != nil {
 		slog.Error("Error fetching updated issue", "id", id, "error", err)
 		response.WriteError(w, http.StatusInternalServerError, "error fetching updated issue")
 		return

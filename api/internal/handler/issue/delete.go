@@ -4,7 +4,6 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/nikhildev/bugsbunny/api/internal/model"
 	"github.com/nikhildev/bugsbunny/api/internal/response"
 )
 
@@ -15,9 +14,8 @@ func (h *Handler) DeleteIssueByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := h.DB.Model(&model.Issue{}).Where("id = ?", id).Update("status", model.ISSUE_DELETED)
-	if result.Error != nil {
-		slog.Error("Error deleting issue", "id", id, "error", result.Error)
+	if err := h.Repo.Delete(id); err != nil {
+		slog.Error("Error deleting issue", "id", id, "error", err)
 		response.WriteError(w, http.StatusInternalServerError, "error deleting issue")
 		return
 	}

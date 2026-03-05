@@ -4,12 +4,12 @@ import (
 	"net/http"
 
 	"github.com/nikhildev/bugsbunny/api/internal/handler/comment"
-	"gorm.io/gorm"
+	"github.com/nikhildev/bugsbunny/api/internal/repository"
 )
 
-func RegisterIssueRoutes(mux *http.ServeMux, db *gorm.DB) {
-	h := &Handler{DB: db}
-	ch := &comment.Handler{DB: db}
+func RegisterIssueRoutes(mux *http.ServeMux, issueRepo repository.IssueRepo, commentRepo repository.CommentRepo) {
+	h := &Handler{Repo: issueRepo}
+	ch := &comment.Handler{Repo: commentRepo}
 	mux.HandleFunc("GET /issues", h.GetIssues)
 	mux.HandleFunc("POST /issues", h.CreateIssue)
 	mux.HandleFunc("GET /issues/{id}", h.GetIssueByID)

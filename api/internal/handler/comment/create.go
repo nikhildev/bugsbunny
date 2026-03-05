@@ -42,9 +42,8 @@ func (h *Handler) CreateComment(w http.ResponseWriter, r *http.Request) {
 	c.IssueID = issueId
 	c.Author = authorID
 
-	result := h.DB.Create(&c)
-	if result.Error != nil {
-		slog.Error("Error creating comment", "error", result.Error)
+	if err = h.Repo.Create(&c); err != nil {
+		slog.Error("Error creating comment", "error", err)
 		response.WriteError(w, http.StatusInternalServerError, "error creating comment")
 		return
 	}

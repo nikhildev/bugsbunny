@@ -1,7 +1,7 @@
 package comment
 
-import "gorm.io/gorm"
+import "github.com/nikhildev/bugsbunny/api/internal/repository"
 
 type Handler struct {
-	DB *gorm.DB
+	Repo repository.CommentRepo
 }
