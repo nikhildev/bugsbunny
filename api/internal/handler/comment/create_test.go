@@ -27,7 +27,7 @@ func TestCreateCommentHandler_Success(t *testing.T) {
 		Name:        "Test Project",
 		Description: "Test Description",
 		Owner:       "test-owner",
-		Status:      model.ACTIVE,
+		Status:      model.ProjectStatusActive,
 	}
 	result := db.Create(&project)
 	if result.Error != nil {
@@ -57,13 +57,13 @@ func TestCreateCommentHandler_Success(t *testing.T) {
 	issue := model.Issue{
 		Title:       "Test Issue",
 		Description: "Test Description",
-		Type:        model.BUG,
-		Status:      model.NEW,
+		Type:        model.IssueTypeBug,
+		Status:      model.IssueStatusNew,
 		AssigneeId:  &assignee.ID,
 		ReporterId:  reporter.ID,
 		ProjectID:   project.ID,
-		Priority:    model.LOW_PRIORITY,
-		Severity:    model.LOW_SEVERITY,
+		Priority:    model.PriorityLow,
+		Severity:    model.SeverityLow,
 	}
 	issueResult := db.Create(&issue)
 	if issueResult.Error != nil {
@@ -235,7 +235,7 @@ func TestCreateCommentHandler_EmptyContent(t *testing.T) {
 		Name:        "Test Project",
 		Description: "Test Description",
 		Owner:       "test-owner",
-		Status:      model.ACTIVE,
+		Status:      model.ProjectStatusActive,
 	}
 	result := db.Create(&project)
 	if result.Error != nil {
@@ -265,13 +265,13 @@ func TestCreateCommentHandler_EmptyContent(t *testing.T) {
 	issue := model.Issue{
 		Title:       "Test Issue",
 		Description: "Test Description",
-		Type:        model.BUG,
-		Status:      model.NEW,
+		Type:        model.IssueTypeBug,
+		Status:      model.IssueStatusNew,
 		AssigneeId:  &assignee.ID,
 		ReporterId:  reporter.ID,
 		ProjectID:   project.ID,
-		Priority:    model.LOW_PRIORITY,
-		Severity:    model.LOW_SEVERITY,
+		Priority:    model.PriorityLow,
+		Severity:    model.SeverityLow,
 	}
 	issueResult := db.Create(&issue)
 	if issueResult.Error != nil {

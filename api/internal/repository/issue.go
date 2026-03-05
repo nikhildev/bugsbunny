@@ -43,5 +43,5 @@ func (r *IssueRepository) Update(id string, updates map[string]any) (int64, erro
 }
 
 func (r *IssueRepository) Delete(id string) error {
-	return r.DB.Model(&model.Issue{}).Where("id = ?", id).Update("status", model.ISSUE_DELETED).Error
+	return r.DB.Model(&model.Issue{}).Where("id = ?", id).Update("status", model.IssueStatusDeleted).Error
 }

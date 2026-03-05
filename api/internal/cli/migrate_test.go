@@ -117,7 +117,7 @@ func TestSeedFromJSON_Projects(t *testing.T) {
 	assert.Equal(t, "General", projects[0].Name)
 	assert.Equal(t, "All general issues", projects[0].Description)
 	assert.Equal(t, "admin", projects[0].Owner)
-	assert.Equal(t, model.ACTIVE, projects[0].Status)
+	assert.Equal(t, model.ProjectStatusActive, projects[0].Status)
 	assert.False(t, projects[0].IsBotEnabled)
 }
 
@@ -137,8 +137,8 @@ func TestSeedFromJSON_Issues(t *testing.T) {
 	require.Len(t, issues, 1)
 	assert.Equal(t, "Issue 1", issues[0].Title)
 	assert.Equal(t, "Description 1", issues[0].Description)
-	assert.Equal(t, model.NEW, issues[0].Status)
-	assert.Equal(t, model.SUPPORT, issues[0].Type)
+	assert.Equal(t, model.IssueStatusNew, issues[0].Status)
+	assert.Equal(t, model.IssueTypeSupport, issues[0].Type)
 	assert.Equal(t, "019c48e9-ab2e-7c50-9e03-23f8af4fdd2c", issues[0].ReporterId)
 	assert.Equal(t, "019c48e9-ab2e-7c50-9e03-23f8af4fdd2e", issues[0].ProjectID)
 }

@@ -21,9 +21,9 @@ type Project struct {
 type ProjectStatus string
 
 const (
-	ACTIVE   ProjectStatus = "active"
-	ARCHIVED ProjectStatus = "archived"
-	DELETED  ProjectStatus = "deleted"
+	ProjectStatusActive   ProjectStatus = "active"
+	ProjectStatusArchived ProjectStatus = "archived"
+	ProjectStatusDeleted  ProjectStatus = "deleted"
 )
 
 func (p *Project) BeforeCreate(tx *gorm.DB) (err error) {
