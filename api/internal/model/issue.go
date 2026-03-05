@@ -39,39 +39,39 @@ func (i *Issue) BeforeCreate(tx *gorm.DB) (err error) {
 type IssueType string
 
 const (
-	BUG           IssueType = "bug"
-	FEATURE       IssueType = "feature"
-	SUPPORT       IssueType = "support"
-	IMPROVEMENT   IssueType = "improvement"
-	DOCUMENTATION IssueType = "documentation"
+	IssueTypeBug           IssueType = "bug"
+	IssueTypeFeature       IssueType = "feature"
+	IssueTypeSupport       IssueType = "support"
+	IssueTypeImprovement   IssueType = "improvement"
+	IssueTypeDocumentation IssueType = "documentation"
 )
 
 type IssueStatus string
 
 const (
-	NEW           IssueStatus = "new"
-	RESOLVED      IssueStatus = "resolved"
-	IN_PROGRESS   IssueStatus = "in_progress"
-	REOPENED      IssueStatus = "reopened"
-	BLOCKED       IssueStatus = "blocked"
-	ON_HOLD       IssueStatus = "on_hold"
-	ISSUE_DELETED IssueStatus = "deleted"
+	IssueStatusNew       IssueStatus = "new"
+	IssueStatusResolved  IssueStatus = "resolved"
+	IssueStatusProgress  IssueStatus = "in_progress"
+	IssueStatusReopened  IssueStatus = "reopened"
+	IssueStatusBlocked   IssueStatus = "blocked"
+	IssueStatusOnHold    IssueStatus = "on_hold"
+	IssueStatusDeleted   IssueStatus = "deleted"
 )
 
 type Severity string
 
 const (
-	LOW_SEVERITY      Severity = "low"
-	MEDIUM_SEVERITY   Severity = "medium"
-	HIGH_SEVERITY     Severity = "high"
-	CRITICAL_SEVERITY Severity = "critical"
+	SeverityLow      Severity = "low"
+	SeverityMedium   Severity = "medium"
+	SeverityHigh     Severity = "high"
+	SeverityCritical Severity = "critical"
 )
 
 type Priority string
 
 const (
-	LOW_PRIORITY      Priority = "low"
-	MEDIUM_PRIORITY   Priority = "medium"
-	HIGH_PRIORITY     Priority = "high"
-	CRITICAL_PRIORITY Priority = "critical"
+	PriorityLow      Priority = "low"
+	PriorityMedium   Priority = "medium"
+	PriorityHigh     Priority = "high"
+	PriorityCritical Priority = "critical"
 )

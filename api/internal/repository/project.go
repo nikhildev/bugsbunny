@@ -43,5 +43,5 @@ func (r *ProjectRepository) Update(id string, updates map[string]any) (int64, er
 }
 
 func (r *ProjectRepository) Delete(id string) error {
-	return r.DB.Model(&model.Project{}).Where("id = ?", id).Update("status", model.DELETED).Error
+	return r.DB.Model(&model.Project{}).Where("id = ?", id).Update("status", model.ProjectStatusDeleted).Error
 }
