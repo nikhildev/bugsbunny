@@ -50,6 +50,66 @@ cd api && docker compose up -d
 
 Use `api/.env` or `DB_*` / `DATABASE_URL` environment variables for database config.
 
+## Architecture
+
+```
+                            ┌─────────────────────┐
+                            │      main.go         │
+                            │   cli.Execute()      │
+                            └─────────┬───────────┘
+                                      │
+                            ┌─────────▼───────────┐
+                            │    Cobra CLI         │
+                            │  server │ migrate    │
+                            └─────────┬───────────┘
+                                      │ "server" cmd
+          ┌───────────────────────────▼───────────────────────────┐
+          │                    STARTUP (server.go)                │
+          │  1. Load config (.env / env vars)                     │
+          │  2. Connect PostgreSQL (GORM)                         │
+          │  3. Init Embedding client (EmbeddingGemma)            │
+          │  4. Init Weaviate (vector DB)                         │
+          │  5. Setup routes + middleware                         │
+          │  6. http.ListenAndServe()                             │
+          └───────────────────────────┬───────────────────────────┘
+                                      │
+                      ┌───────────────▼───────────────┐
+                      │   Middleware Chain             │
+                      │  Recovery → Logging → CORS    │
+                      └───────────────┬───────────────┘
+                                      │
+                ┌─────────────────────▼─────────────────────┐
+                │              http.ServeMux (router.go)     │
+                ├───────────┬──────────┬──────────┬─────────┤
+                │           │          │          │         │
+           /health    /projects   /issues   /search   /simulate
+                │           │          │       /knowledge    /rag
+                │           │          │          │         │
+                │      ┌────▼────┐ ┌──▼───┐  ┌───▼───┐ ┌──▼──┐
+                │      │ CRUD    │ │ CRUD │  │Vector │ │ RAG │
+                │      │ + Sync  │ │      │  │Search │ │Test │
+                │      │ to      │ │      │  │       │ │     │
+                │      │Weaviate │ │      │  │       │ │     │
+                │      └────┬────┘ └──┬───┘  └───┬───┘ └──┬──┘
+                │           │         │          │        │
+                │      ┌────▼─────────▼──┐  ┌────▼────────▼───┐
+                │      │   PostgreSQL    │  │   Weaviate      │
+                │      │   (GORM ORM)   │  │   (Vectors)     │
+                │      │                │  │                  │
+                │      │ Users          │  │ KnowledgeEntry   │
+                │      │ Projects       │  │  - projectId     │
+                │      │ Issues         │  │  - content       │
+                │      │ Comments       │  │  - vector[768]   │
+                │      │ Changes        │  │                  │
+                │      └────────────────┘  └────────┬─────────┘
+                │                                   │
+                │                          ┌────────▼─────────┐
+                │                          │  EmbeddingGemma  │
+                │                          │  (self-hosted)   │
+                │                          │  OpenAI-compat   │
+                │                          └──────────────────┘
+```
+
 ## RAG architecture
 
 BugsBunny uses a self-hosted RAG (Retrieval-Augmented Generation) pipeline for bot knowledge search.
