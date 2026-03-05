@@ -30,9 +30,8 @@ func (h *Handler) CreateIssue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := h.DB.Create(&issue)
-	if result.Error != nil {
-		slog.Error("Error creating issue", "error", result.Error)
+	if err = h.Repo.Create(&issue); err != nil {
+		slog.Error("Error creating issue", "error", err)
 		response.WriteError(w, http.StatusInternalServerError, "error creating issue")
 		return
 	}

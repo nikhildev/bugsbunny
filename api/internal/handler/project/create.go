@@ -31,9 +31,8 @@ func (h *Handler) CreateProject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := h.DB.Create(&project)
-	if result.Error != nil {
-		slog.Error("Error creating project", "error", result.Error)
+	if err = h.Repo.Create(&project); err != nil {
+		slog.Error("Error creating project", "error", err)
 		response.WriteError(w, http.StatusInternalServerError, "error creating project")
 		return
 	}

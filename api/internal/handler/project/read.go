@@ -4,7 +4,6 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/nikhildev/bugsbunny/api/internal/model"
 	"github.com/nikhildev/bugsbunny/api/internal/response"
 )
 
@@ -15,9 +14,8 @@ func (h *Handler) GetProjectByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var project model.Project
-	result := h.DB.First(&project, "id = ?", id)
-	if result.Error != nil {
+	project, err := h.Repo.GetByID(id)
+	if err != nil {
 		response.WriteError(w, http.StatusNotFound, "project not found")
 		return
 	}
@@ -26,10 +24,9 @@ func (h *Handler) GetProjectByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetProjects(w http.ResponseWriter, r *http.Request) {
-	var projects []model.Project
-	result := h.DB.Find(&projects)
-	if result.Error != nil {
-		slog.Error("Error getting projects", "error", result.Error)
+	projects, err := h.Repo.GetAll()
+	if err != nil {
+		slog.Error("Error getting projects", "error", err)
 		response.WriteError(w, http.StatusInternalServerError, "error getting projects")
 		return
 	}

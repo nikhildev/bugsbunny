@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/nikhildev/bugsbunny/api/internal/model"
+	"github.com/nikhildev/bugsbunny/api/internal/repository"
 	"github.com/nikhildev/bugsbunny/api/internal/testutil"
 	"github.com/stretchr/testify/assert"
 )
@@ -90,7 +91,7 @@ func TestCreateCommentHandler_Success(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	// Execute handler
-	h := &Handler{DB: db}
+	h := &Handler{Repo: repository.NewCommentRepository(db)}
 	h.CreateComment(w, req)
 
 	// Assertions
@@ -128,7 +129,7 @@ func TestCreateCommentHandler_MissingIssueID(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	// Execute handler
-	h := &Handler{DB: db}
+	h := &Handler{Repo: repository.NewCommentRepository(db)}
 	h.CreateComment(w, req)
 
 	// Assertions
@@ -154,7 +155,7 @@ func TestCreateCommentHandler_InvalidJSON(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	// Execute handler
-	h := &Handler{DB: db}
+	h := &Handler{Repo: repository.NewCommentRepository(db)}
 	h.CreateComment(w, req)
 
 	// Assertions
@@ -185,7 +186,7 @@ func TestCreateCommentHandler_InvalidUserUUID(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	// Execute handler
-	h := &Handler{DB: db}
+	h := &Handler{Repo: repository.NewCommentRepository(db)}
 	h.CreateComment(w, req)
 
 	// Assertions
@@ -215,7 +216,7 @@ func TestCreateCommentHandler_MissingUserUUID(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	// Execute handler
-	h := &Handler{DB: db}
+	h := &Handler{Repo: repository.NewCommentRepository(db)}
 	h.CreateComment(w, req)
 
 	// Assertions
@@ -297,7 +298,7 @@ func TestCreateCommentHandler_EmptyContent(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	// Execute handler
-	h := &Handler{DB: db}
+	h := &Handler{Repo: repository.NewCommentRepository(db)}
 	h.CreateComment(w, req)
 
 	// Note: This test documents current behavior - the handler accepts empty content

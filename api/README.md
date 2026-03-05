@@ -92,7 +92,16 @@ Use `api/.env` or `DB_*` / `DATABASE_URL` environment variables for database con
                 │      │Weaviate │ │      │  │       │ │     │
                 │      └────┬────┘ └──┬───┘  └───┬───┘ └──┬──┘
                 │           │         │          │        │
-                │      ┌────▼─────────▼──┐  ┌────▼────────▼───┐
+                │      ┌────▼─────────▼──┐       │        │
+                │      │  Repository     │       │        │
+                │      │  Layer          │       │        │
+                │      │                 │       │        │
+                │      │ ProjectRepo     │       │        │
+                │      │ IssueRepo       │       │        │
+                │      │ CommentRepo     │       │        │
+                │      └────────┬────────┘       │        │
+                │               │                │        │
+                │      ┌────────▼────────┐  ┌────▼────────▼───┐
                 │      │   PostgreSQL    │  │   Weaviate      │
                 │      │   (GORM ORM)   │  │   (Vectors)     │
                 │      │                │  │                  │

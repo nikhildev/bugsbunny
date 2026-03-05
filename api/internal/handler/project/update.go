@@ -39,14 +39,19 @@ func (h *Handler) UpdateProject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := h.DB.Model(&model.Project{}).Where("id = ?", id).Updates(u)
-	if result.RowsAffected == 0 {
+	rowsAffected, err := h.Repo.Update(id, u)
+	if err != nil {
+		slog.Error("Error updating project", "id", id, "error", err)
+		response.WriteError(w, http.StatusInternalServerError, "error updating project")
+		return
+	}
+	if rowsAffected == 0 {
 		response.WriteError(w, http.StatusNotFound, "project not found")
 		return
 	}
 
-	var updatedProject model.Project
-	if err = h.DB.Where("id = ?", id).First(&updatedProject).Error; err != nil {
+	updatedProject, err := h.Repo.GetByID(id)
+	if err != nil {
 		slog.Error("Error fetching updated project", "id", id, "error", err)
 		response.WriteError(w, http.StatusInternalServerError, "error fetching updated project")
 		return
